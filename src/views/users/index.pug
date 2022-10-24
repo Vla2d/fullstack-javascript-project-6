@@ -1,0 +1,23 @@
+extends ../layout.pug
+
+block header
+  h1(class="mb-3")=t('views.users.index.header')
+
+block content
+  div(class="table")
+    table(class="table table-borderless table-sm")
+      thead
+        tr
+          th(scope="col")=t('views.users.index.id')
+          th(scope="col")=t('views.users.index.name')
+          th(scope="col")=t('views.users.index.email')
+          th(scope="col")=t('views.users.index.createDate')
+          th(scope="col")=t('views.users.index.actions')
+      tbody
+      each user in users
+        tr
+          td=user.id
+          td=`${user.firstName} ${user.lastName}`
+          td=user.email
+          td=user.createdAt
+          td!=`<div class="d-flex flex-wrap"><a class="btn btn-primary me-1" href="/users/${user.id}/edit">${t('views.users.index.change')}</a><form action="/users/${user.id}" method="post"><input name="_method" type="hidden" value="delete"><input class="btn btn-danger" type="submit" value=${t('views.users.index.delete')}></form></div>`

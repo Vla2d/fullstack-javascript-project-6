@@ -1,0 +1,16 @@
+extends ../layout.pug
+
+block header
+  h1(class="mb-3")=t('views.users.edit.header')
+
+block content
+  div(class="row")
+    div(class="col-4")
+      form(action=`${reverse('users')}/${user.id}` method="post")
+        +input('text', 'firstName', t('views.users.edit.firstName'), errors, user)
+        +input('text', 'lastName', t('views.users.edit.lastName'), errors, user)
+        +input('email', 'email', t('views.users.edit.email'), errors, user)
+        +input('password', 'password', t('views.users.edit.password'), errors)
+        div(class="form-floating mb-3")
+          input(type="hidden" name="_method" value="patch")
+        +submitButton(t('views.users.edit.submit'))

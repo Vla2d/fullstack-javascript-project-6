@@ -1,0 +1,10 @@
+mixin submitButton(text)
+  button(class="w-100 mb-2 btn btn-lg rounded-3 btn-primary" type="submit")=text
+
+mixin input(type, fieldName, text, errors = {}, values = {})
+    - classLine = 'form-control rounded-3' + (_.has(errors, fieldName) ? ' is-invalid' : '')
+    div(class="form-floating mb-3")
+        input(type=type class=classLine id=`data_${fieldName}` name=`data[${fieldName}]` placeholder=text value=values[fieldName])
+        label(for=`data_${fieldName}`)=text
+        if (_.has(errors, fieldName))
+            div(class="form-control-feedback invalid-feedback")=errors[fieldName][0].message

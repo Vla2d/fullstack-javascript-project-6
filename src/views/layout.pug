@@ -1,0 +1,31 @@
+include mixins.pug
+
+doctype html
+html(lang="en")
+  head
+    meta(charset="utf-8")
+    meta(name="viewport" content="width=device-width, initial-scale=1")
+    title=t('appName')
+  body
+    each messages, type in reply.flash() || []
+      each message in messages
+        div(class=`alert alert-${getAlertClass(type)} mb-0 text-center` role="alert")=message
+    nav(class="navbar navbar-expand-md navbar-dark bg-dark mb-4")
+      div(class="container-fluid")
+        a(class="navbar-brand" href=reverse('index'))=t('appName')
+        div(class="collapse navbar-collapse" id="navbarCollapse")
+          ul(class="navbar-nav me-auto mb-2 mb-md-0")
+            li(class="nav-item")
+              a(class="nav-link" href=reverse('users'))=t('layout.users')
+          if isAuthenticated
+            form(action=reverse('session') method="post")
+              input(name="_method" type="hidden" value="delete")
+              input(class="btn btn-outline-warning" type="submit" value=t('layout.signOut'))
+          else
+            a(class="btn btn-outline-primary me-2" href=reverse('newSession') role="button")=t('layout.signIn')
+            a(class="btn btn-primary" href=reverse('newUser') role="button")=t('layout.signUp')
+    main(class="container")
+      div(class="bg-light p-3 rounded")
+        block header
+        block content
+    script(src="/assets/main.js")

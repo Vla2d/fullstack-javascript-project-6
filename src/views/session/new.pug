@@ -1,0 +1,12 @@
+extends ../layout.pug
+
+block header
+  h1(class="mb-3")=t('views.session.new.header')
+
+block content
+  div(class="row")
+    div(class="col-4")
+      form(action="/session" method="post")
+        +input('email', 'email', t('views.session.new.email'), errors, values)
+        +input('password', 'password', t('views.session.new.password'), errors)
+        +submitButton(t('views.session.new.submit'))
