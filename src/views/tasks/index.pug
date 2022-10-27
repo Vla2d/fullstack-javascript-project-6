@@ -1,0 +1,31 @@
+extends ../layout.pug
+
+block header
+  h1(class="mb-3")=t('views.tasks.index.header')
+
+block content
+    a(class="btn btn-warning mb-3" href="/tasks/new" role="button")=t('views.tasks.index.new')
+    div(class="table")
+      table(class="table table-borderless table-sm")
+        thead
+          tr
+            th(scope="col")=t('views.tasks.index.id')
+            th(scope="col")=t('views.tasks.index.name')
+            th(scope="col")=t('views.tasks.index.status')
+            th(scope="col")=t('views.tasks.index.creator')
+            th(scope="col")=t('views.tasks.index.executor')
+            th(scope="col")=t('views.tasks.index.createDate')
+        tbody
+        each task in tasks
+          tr
+            td=task.id
+            td
+              a(href=`/tasks/${task.id}`)=task.name
+            td=task.taskStatus[0].name
+            td=`${task.creator[0].firstName} ${task.creator[0].lastName}`
+            if task.executor[0]
+              td=`${task.executor[0].firstName} ${task.executor[0].lastName}`
+            else
+              td
+            td=task.createdAt
+            td!=`<div class="d-flex flex-wrap"><a class="btn btn-warning me-1" href="${reverse('editTask', { id: task.id })}">${t('views.tasks.index.change')}</a><form action="${reverse('deleteTask', { id: task.id })}" method="post"><input name="_method" type="hidden" value="delete"><input class="btn btn-danger" type="submit" value=${t('views.tasks.index.delete')}></form></div>`

@@ -20,4 +20,4 @@ block content
           td=`${user.firstName} ${user.lastName}`
           td=user.email
           td=user.createdAt
-          td!=`<div class="d-flex flex-wrap"><a class="btn btn-primary me-1" href="/users/${user.id}/edit">${t('views.users.index.change')}</a><form action="/users/${user.id}" method="post"><input name="_method" type="hidden" value="delete"><input class="btn btn-danger" type="submit" value=${t('views.users.index.delete')}></form></div>`
+          td!=`<div class="d-flex flex-wrap"><a class="btn btn-primary me-1" href=${reverse('editUser', { id: user.id })}>${t('views.users.index.change')}</a><form action="${reverse('deleteUser', { id: user.id })}" method="post"><input name="_method" type="hidden" value="delete"><input class="btn btn-danger" type="submit" value=${t('views.users.index.delete')}></form></div>`

@@ -1,4 +1,5 @@
 setup:
+	make prepare-env
 	npm ci
 start:
 	heroku local -f Procfile.dev
@@ -12,3 +13,5 @@ create-db-migration:
 	npx knex --esm migrate:make $(name)
 db-migrate:
 	npx knex --esm migrate:latest
+prepare-env:
+	cp -n .env.example .env || true

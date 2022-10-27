@@ -13,8 +13,8 @@ exports.up = function(knex) {
       table.foreign('creator_id').references('id').inTable('users');
       table.foreign('executor_id').references('id').inTable('users');
     })
-};
+  };
   
-exports.down = function(knex) {
+  exports.down = function(knex) {
     return knex.schema.dropTable('tasks');
-};
+  };

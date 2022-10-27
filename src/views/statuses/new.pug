@@ -1,0 +1,11 @@
+extends ../layout.pug
+
+block header
+  h1(class="mb-3")=t('views.statuses.new.header')
+
+block content
+  div(class="row")
+    div(class="col-4")
+      form(action=reverse('statuses') method="post")
+        +input('text', 'name', t('views.statuses.new.name'), errors, values)
+        +submitButton(t('views.statuses.new.submit'))

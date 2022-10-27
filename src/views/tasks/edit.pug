@@ -1,0 +1,16 @@
+extends ../layout.pug
+
+block header
+  h1(class="mb-3")=t('views.tasks.edit.header')
+
+block content
+  div(class="row")
+    div(class="col-4")
+      form(action=reverse('task', { id: task.id }) method="post")
+        +input('text', 'name', t('views.tasks.edit.name'), errors, task)
+        +textarea('description', t('views.tasks.edit.description'), errors, task)
+        +select('statusId', t('views.tasks.edit.status'), errors, statuses, task)
+        +select('executorId', t('views.tasks.edit.executor'), errors, users, task)
+        div(class="form-floating mb-3")
+          input(type="hidden" name="_method" value="patch")
+        +submitButton(t('views.tasks.edit.submit'))

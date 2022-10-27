@@ -14,6 +14,11 @@ export default {
       directory: join(__dirname, 'src', 'migrations'),
       extension: 'cjs',
     },
+    pool: {
+      afterCreate: (conn, done) => {
+        conn.run('PRAGMA foreign_keys = ON', done);
+      },
+    },
   },
   test: {
     client: 'sqlite3',

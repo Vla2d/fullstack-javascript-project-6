@@ -82,7 +82,7 @@ const setUpViews = (app) => {
     includeViewExtension: true,
     defaultContext: {
       t: (key) => i18next.t(key),
-      reverse: (name) => app.reverse(name),
+      reverse: (name, options) => app.reverse(name, options),
       _,
       getAlertClass: (type) => {
         switch (type) {

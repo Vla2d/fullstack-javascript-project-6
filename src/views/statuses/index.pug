@@ -1,0 +1,22 @@
+extends ../layout.pug
+
+block header
+  h1(class="mb-3")=t('views.statuses.index.header')
+
+block content
+  a(class="btn btn-primary mb-3" href=reverse('newStatus') role="button")=t('views.statuses.index.new')
+  div(class="table")
+    table(class="table table-borderless table-sm")
+      thead
+        tr
+          th(scope="col")=t('views.statuses.index.id')
+          th(scope="col")=t('views.statuses.index.name')
+          th(scope="col")=t('views.statuses.index.createDate')
+          th
+      tbody
+         each status in statuses
+          tr
+            td=status.id
+            td=status.name
+            td=status.createdAt
+            td!=`<div class="d-flex flex-wrap"><a class="btn btn-primary me-1" href="${reverse('editStatus', { id: status.id })}">${t('views.statuses.index.change')}</a><form action="${reverse('deleteStatus', { id: status.id })}" method="post"><input name="_method" type="hidden" value="delete"><input class="btn btn-danger" type="submit" value=${t('views.statuses.index.delete')}></form></div>`

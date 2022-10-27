@@ -9,7 +9,7 @@ export default (app) => {
   app.get('/users/new', { name: 'newUser' }, (request, reply) => {
     reply.render('users/new');
   });
-  app.get('/users/:id/edit', async (request, reply) => {
+  app.get('/users/:id/edit', { name: 'editUser' }, async (request, reply) => {
     if (!app.isAuth(request, reply)) {
       return reply;
     }
@@ -55,7 +55,7 @@ export default (app) => {
     }
     return reply;
   });
-  app.delete('/users/:id', async (request, reply) => {
+  app.delete('/users/:id', { name: 'deleteUser' }, async (request, reply) => {
     if (!app.isAuth(request, reply)) {
       return reply;
     }

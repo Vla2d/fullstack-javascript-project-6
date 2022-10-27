@@ -1,0 +1,14 @@
+extends ../layout.pug
+
+block header
+  h1=t('views.tasks.new.header')
+
+block content
+  div(class="row")
+    div(class="col-4")
+      form(action="/tasks" method="post")
+        +input('text', 'name', t('views.tasks.new.name'), errors, task)
+        +textarea('description', t('views.tasks.new.description'), errors, task)
+        +select('statusId', t('views.tasks.new.status'), errors, statuses, task)
+        +select('executorId', t('views.tasks.new.executor'), errors, users, task)
+        +submitButton(t('views.tasks.new.submit'))

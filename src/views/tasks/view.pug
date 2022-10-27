@@ -1,0 +1,27 @@
+extends ../layout.pug
+
+block header
+  h1=task.name
+
+block content
+  div(class="row mt-5 p-5 shadow bg-white")
+    div(class="col-12 col-md-8 order-2 order-md-1")
+      div(class="lead fw-normal mb-4")=task.description
+    div(class="col-12 col-md-4 border-start px-3 order-1 order-md-2 mb-3 mb-md-0")
+      div(class="mb-2")
+        span(class="me-1 badge bg-danger text-white")=task.taskStatus[0].name
+      div(class="d-flex flex-wrap mb-3")
+        span(class="text-muted me-2")=t('views.tasks.view.creator')
+        span=`${task.creator[0].firstName} ${task.creator[0].lastName}`
+      div(class="d-flex flex-wrap mb-3")
+        span(class="text-muted me-2")=t('views.tasks.view.executor')
+        if task.executor[0]
+          span=`${task.executor[0].firstName} ${task.executor[0].lastName}`
+      div(class="d-flex flex-wrap mb-3")
+        span(class="text-muted me-2")=t('views.tasks.view.createdAt')
+        span=task.createdAt
+      div(class="d-flex flex-wrap")
+        a(class="btn btn-primary me-1" href=`${reverse('editTask', { id: task.id })}`)=t('views.tasks.view.change')
+        form(action=`${reverse('deleteTask', { id: task.id })}` method="post")
+          input(name="_method" type="hidden" value="delete")
+          input(class="btn btn-danger" type="submit" value=t('views.tasks.view.delete'))
