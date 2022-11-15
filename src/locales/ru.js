@@ -8,6 +8,7 @@ export default {
       signOut: 'Выход',
       statuses: 'Статусы',
       tasks: 'Задачи',
+      labels: 'Метки',
     },
     flash: {
       authenticationError: 'Доступ запрещён! Пожалуйста, авторизируйтесь.',
@@ -39,6 +40,14 @@ export default {
         authorizationError: 'Задачу может удалить только её автор',
         editError: 'Не удалось изменить задачу',
         edit: 'Задача успешно изменена',
+      },
+      labels: {
+        success: 'Метка успешно создана',
+        createError: 'Не удалось создать метку',
+        delete: 'Метка успешно удалена',
+        edit: 'Метка успешно изменена',
+        editError: 'Не удалось изменить метку',
+        deleteError: 'Не удалось удалить метку',
       },
     },
     views: {
@@ -112,6 +121,7 @@ export default {
           submit: 'Создать',
           status: 'Статус',
           executor: 'Исполнитель',
+          labels: 'Метки',
         },
         index: {
           header: 'Задачи',
@@ -139,6 +149,27 @@ export default {
           description: 'Описание',
           status: 'Статус',
           executor: 'Исполнитель',
+        },
+      },
+      labels: {
+        index: {
+          header: 'Метки',
+          new: 'Создать метку',
+          change: 'Изменить',
+          delete: 'Удалить',
+          id: 'ID',
+          name: 'Наименование',
+          createDate: 'Дата создания',
+        },
+        new: {
+          header: 'Создание метки',
+          submit: 'Создать',
+          name: 'Наименование',
+        },
+        edit: {
+          header: 'Изменение метки',
+          name: 'Наименование',
+          submit: 'Изменить',
         },
       },
     },

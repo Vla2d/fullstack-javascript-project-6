@@ -11,4 +11,5 @@ block content
         +textarea('description', t('views.tasks.new.description'), errors, task)
         +select('statusId', t('views.tasks.new.status'), errors, statuses, task)
         +select('executorId', t('views.tasks.new.executor'), errors, users, task)
+        +multipleSelect('labels', t('views.tasks.new.labels'), errors, labels, task)
         +submitButton(t('views.tasks.new.submit'))

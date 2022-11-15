@@ -11,6 +11,7 @@ block content
         +textarea('description', t('views.tasks.edit.description'), errors, task)
         +select('statusId', t('views.tasks.edit.status'), errors, statuses, task)
         +select('executorId', t('views.tasks.edit.executor'), errors, users, task)
+        +multipleSelect('labels', t('views.tasks.new.labels'), errors, labels, task)
         div(class="form-floating mb-3")
           input(type="hidden" name="_method" value="patch")
         +submitButton(t('views.tasks.edit.submit'))

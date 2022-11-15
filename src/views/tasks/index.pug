@@ -4,7 +4,7 @@ block header
   h1(class="mb-3")=t('views.tasks.index.header')
 
 block content
-    a(class="btn btn-warning mb-3" href="/tasks/new" role="button")=t('views.tasks.index.new')
+    a(class="btn btn-primary mb-3" href=reverse('newTask') role="button")=t('views.tasks.index.new')
     div(class="table")
       table(class="table table-borderless table-sm")
         thead
@@ -28,4 +28,4 @@ block content
             else
               td
             td=task.createdAt
-            td!=`<div class="d-flex flex-wrap"><a class="btn btn-warning me-1" href="${reverse('editTask', { id: task.id })}">${t('views.tasks.index.change')}</a><form action="${reverse('deleteTask', { id: task.id })}" method="post"><input name="_method" type="hidden" value="delete"><input class="btn btn-danger" type="submit" value=${t('views.tasks.index.delete')}></form></div>`
+            td!=`<div class="d-flex flex-wrap"><a class="btn btn-primary me-1" href="${reverse('editTask', { id: task.id })}">${t('views.tasks.index.change')}</a><form action="${reverse('deleteTask', { id: task.id })}" method="post"><input name="_method" type="hidden" value="delete"><input class="btn btn-danger" type="submit" value=${t('views.tasks.index.delete')}></form></div>`

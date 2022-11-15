@@ -21,6 +21,8 @@ html(lang="en")
               a(class="nav-link" href=reverse('statuses'))=t('layout.statuses')
             li(class="nav-item")
               a(class="nav-link" href=reverse('tasks'))=t('layout.tasks')
+            li(class="nav-item")
+              a(class="nav-link" href=reverse('labels'))=t('layout.labels')
           if isAuthenticated
             form(action=reverse('session') method="post")
               input(name="_method" type="hidden" value="delete")

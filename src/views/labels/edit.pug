@@ -1,0 +1,13 @@
+extends ../layout.pug
+
+block header
+  h1(class="mb-3")=t('views.labels.edit.header')
+
+block content
+  div(class="row")
+    div(class="col-4")
+      form(action="/labels/" + label.id method="post")
+        +input('text', 'name', t('views.labels.edit.name'), errors, label)
+        div(class="form-floating mb-3")
+          input(type="hidden" name="_method" value="patch")
+        +submitButton(t('views.labels.edit.submit'))
