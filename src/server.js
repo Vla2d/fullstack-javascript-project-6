@@ -13,6 +13,7 @@ import _ from 'lodash';
 import fastifyFormbody from '@fastify/formbody';
 import qs from 'qs';
 import fastifyMethodOverride from 'fastify-method-override';
+import Rollbar from 'rollbar';
 import addRoutes from './routes/add-routes.js';
 import ru from './locales/ru.js';
 import knexConfig from '../knexfile.js';
@@ -113,6 +114,18 @@ const addHooks = (app) => {
   });
 };
 
+const addHandlers = (app) => {
+  const rollbar = new Rollbar({
+    accessToken: process.env.ROLLBAR_ACCESS_TOKEN,
+    captureUncaught: true,
+    captureUnhandledRejections: true,
+  });
+
+  app.setErrorHandler((error) => {
+    rollbar.log(error);
+  });
+};
+
 // eslint-disable-next-line no-unused-vars
 export default async (app, options) => {
   await registerPlugins(app);
@@ -121,5 +134,6 @@ export default async (app, options) => {
   setUpViews(app);
   addRoutes(app);
   addHooks(app);
+  addHandlers(app);
   return app;
 };
