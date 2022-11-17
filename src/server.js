@@ -99,8 +99,8 @@ const setUpViews = (app) => {
       },
     },
   });
-  app.decorateReply('render', (path, variables) => {
-    this.view(path, { ...variables, reply: this });
+  app.decorateReply('render', function render(viewPath, locals) {
+    this.view(viewPath, { ...locals, reply: this });
   });
 };
 
