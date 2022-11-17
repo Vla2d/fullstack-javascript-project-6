@@ -134,6 +134,9 @@ export default {
           creator: 'Автор',
           executor: 'Исполнитель',
           createDate: 'Дата создания',
+          label: 'Метка',
+          myTasks: 'Только мои задачи',
+          filterSubmit: 'Показать',
         },
         view: {
           change: 'Изменить',

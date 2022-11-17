@@ -5,6 +5,18 @@ block header
 
 block content
     a(class="btn btn-primary mb-3" href=reverse('newTask') role="button")=t('views.tasks.index.new')
+    div(class="card shadow-sm")
+      div(class="card-body p-4")
+        form(action=reverse('tasks') method="get")
+          div(class="row")
+            +formSelect('status', t('views.tasks.index.status'), statuses, values)
+            +formSelect('executor', t('views.tasks.index.executor'), users, values)
+            +formSelect('label', t('views.tasks.index.label'), labels, values)
+          div(class="mb-3 form-check")
+            - isChecked = values.isCreatorUser === 'on'
+            input(class="form-check-input" id="data_isCreatorUser" type="checkbox" name="isCreatorUser" checked=isChecked)
+            label(class="form-check-label" for="data_isCreatorUser")=t('views.tasks.index.myTasks')
+          input(class="btn btn-primary" type="submit" value=t('views.tasks.index.filterSubmit'))
     div(class="table")
       table(class="table table-borderless table-sm")
         thead

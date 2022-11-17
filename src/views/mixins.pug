@@ -20,7 +20,7 @@ mixin textarea(fieldName, text, errors = {}, values = {})
 mixin select(fieldName, text, errors = {}, options = [], values = {})
   - classLine = 'form-control rounded-3' + (_.has(errors, fieldName) ? ' is-invalid' : '')
   div(class="form-floating mb-3")
-    select(class=classLine id=`data_${fieldName}` name=`data[${fieldName}]`)&attributes(attributes)
+    select(class=classLine id=`data_${fieldName}` name=`data[${fieldName}]`)
       option
       each option in options
         - isSelect = String(option.id) === String(values[fieldName])
@@ -42,3 +42,16 @@ mixin multipleSelect(fieldName, text, errors = {}, options = [], values = {})
     label(for=`data_${fieldName}`)=text
     if (_.has(errors, fieldName))
       div(class="form-control-feedback invalid-feedback")=errors[fieldName][0].message
+
+mixin formSelect(fieldName, text, options = [], values = {})
+  div(class="col-12 col-md")
+    div(class="input-group mb-3")
+      label(class="input-group-text" for=`data_${fieldName}`)=text
+      select(class="form-select" id=`data_${fieldName}` name=fieldName)
+        option
+        each option in options
+          - isSelect = String(option.id) === String(values[fieldName])
+          if option.name
+            option(value=option.id selected=isSelect)=option.name
+          if option.firstName && option.lastName
+            option(value=option.id selected=isSelect)=`${option.firstName} ${option.lastName}`

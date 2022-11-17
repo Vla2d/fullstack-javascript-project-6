@@ -6,8 +6,30 @@ export default (app) => {
       return reply;
     }
 
-    const tasks = await app.objection.models.task.query().withGraphJoined('[taskStatus, creator, executor]');
-    reply.render('tasks/index', { tasks });
+    const status = request.query.status || undefined;
+    const executor = request.query.executor || undefined;
+    const label = request.query.label || undefined;
+    const creator = request.query.isCreatorUser === 'on' ? request.user.id : undefined;
+    const tasks = await app.objection.models.task.query()
+      .withGraphJoined('[taskStatus, creator, executor, labels]')
+      .skipUndefined()
+      .modify((queryBuilder) => {
+        queryBuilder.where('task_status.id', '=', status);
+        queryBuilder.where('executor.id', '=', executor);
+        queryBuilder.where('labels.id', '=', label);
+        queryBuilder.where('creator.id', '=', creator);
+      });
+    const statuses = await app.objection.models.taskStatus.query();
+    const labels = await app.objection.models.label.query();
+    const users = await app.objection.models.user.query();
+    reply.render('tasks/index', {
+      tasks,
+      statuses,
+      labels,
+      users,
+      values:
+      request.query,
+    });
     return reply;
   });
   app.get('/tasks/new', { name: 'newTask' }, async (request, reply) => {
