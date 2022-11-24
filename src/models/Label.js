@@ -1,6 +1,11 @@
+import objectionUnique from 'objection-unique';
 import { Model } from 'objection';
 
-export default class Label extends Model {
+const unique = objectionUnique({
+  fields: ['name'],
+});
+
+export default class Label extends unique(Model) {
   static get tableName() {
     return 'labels';
   }
