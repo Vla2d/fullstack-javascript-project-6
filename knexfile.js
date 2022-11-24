@@ -3,6 +3,10 @@ import { fileURLToPath } from 'url';
 
 // eslint-disable-next-line no-underscore-dangle
 const __dirname = dirname(fileURLToPath(import.meta.url));
+const migrations = {
+  directory: join(__dirname, 'src', 'migrations'),
+  extension: 'cjs',
+};
 
 export default {
   development: {
@@ -10,10 +14,7 @@ export default {
     connection: {
       filename: join(__dirname, 'src', 'database.sqlite'),
     },
-    migrations: {
-      directory: join(__dirname, 'src', 'migrations'),
-      extension: 'cjs',
-    },
+    migrations,
     pool: {
       afterCreate: (conn, done) => {
         conn.run('PRAGMA foreign_keys = ON', done);
@@ -25,10 +26,7 @@ export default {
     connection: {
       filename: ':memory:',
     },
-    migrations: {
-      directory: join(__dirname, 'src', 'migrations'),
-      extension: 'cjs',
-    },
+    migrations,
   },
   production: {
     client: 'pg',
@@ -36,9 +34,6 @@ export default {
       connectionString: process.env.DATABASE_URL,
       ssl: { rejectUnauthorized: false },
     },
-    migrations: {
-      directory: join(__dirname, 'src', 'migrations'),
-      extension: 'cjs',
-    },
+    migrations,
   },
 };

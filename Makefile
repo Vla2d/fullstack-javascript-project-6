@@ -15,3 +15,7 @@ db-migrate:
 	npx knex --esm migrate:latest
 prepare-env:
 	cp -n .env.example .env || true
+test-coverage:
+	npm run test -- --coverage
+test:
+	npm run test
