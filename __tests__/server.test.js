@@ -8,7 +8,10 @@ describe('test main page', () => {
   let app;
 
   beforeAll(async () => {
-    app = fastify();
+    app = fastify({
+      exposeHeadRoutes: false,
+      logger: { target: 'pino-pretty' },
+    });
     await build(app);
   });
 

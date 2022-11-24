@@ -1,5 +1,5 @@
 import { plugin as fastifyReverseRoutes } from 'fastify-reverse-routes';
-import pointOfView from 'point-of-view';
+import pointOfView from '@fastify/view';
 import pug from 'pug';
 import i18next from 'i18next';
 import fastifyStatic from '@fastify/static';
@@ -8,6 +8,7 @@ import { fileURLToPath } from 'url';
 import fastifyObjectionjs from 'fastify-objectionjs';
 import fastifySecureSession from '@fastify/secure-session';
 import fastifyPassport from '@fastify/passport';
+import fastifySensible from '@fastify/sensible';
 import LocalStrategy from 'passport-local';
 import _ from 'lodash';
 import fastifyFormbody from '@fastify/formbody';
@@ -34,16 +35,17 @@ const setUpLocales = async () => {
 };
 
 const registerPlugins = async (app) => {
+  await app.register(fastifySensible);
   await app.register(fastifyMethodOverride);
-  app.register(fastifyReverseRoutes);
-  app.register(fastifyFormbody, { parser: qs.parse });
-  app.register(fastifyObjectionjs, {
+  await app.register(fastifyReverseRoutes);
+  await app.register(fastifyFormbody, { parser: qs.parse });
+  await app.register(fastifyObjectionjs, {
     knexConfig: knexConfig[mode],
     models,
   });
-  app.register(fastifySecureSession, { secret: process.env.SESSION_SECRET, cookie: { path: '/' } });
-  app.register(fastifyPassport.initialize());
-  app.register(fastifyPassport.secureSession());
+  await app.register(fastifySecureSession, { secret: process.env.SESSION_SECRET, cookie: { path: '/' } });
+  await app.register(fastifyPassport.initialize());
+  await app.register(fastifyPassport.secureSession());
   fastifyPassport.use('local', new LocalStrategy({ usernameField: 'data[email]', passwordField: 'data[password]' }, async (email, password, done) => {
     const user = await app.objection.models.user.query().findOne({ email });
     if (user && user.verifyPassword(password)) {
@@ -56,8 +58,9 @@ const registerPlugins = async (app) => {
     const user = app.objection.models.user.query().findById(id);
     return user;
   });
-  app.decorate('fp', fastifyPassport);
-  app.decorate('isAuth', (request, reply) => {
+  // fastifyPassport.use(new FormStrategy('form', app))
+  await app.decorate('fp', fastifyPassport);
+  await app.decorate('isAuth', (request, reply) => {
     if (request.isAuthenticated()) {
       return true;
     }
@@ -126,14 +129,20 @@ const addHandlers = (app) => {
   });
 };
 
+export const options = {
+  exposeHeadRoutes: false,
+};
+
 // eslint-disable-next-line no-unused-vars
-export default async (app, options) => {
+export default async (app, _options) => {
   await registerPlugins(app);
-  setUpStaticAssets(app);
+
   await setUpLocales(app);
+  setUpStaticAssets(app);
   setUpViews(app);
   addRoutes(app);
   addHooks(app);
   addHandlers(app);
+
   return app;
 };

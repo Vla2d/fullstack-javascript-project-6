@@ -9,7 +9,10 @@ describe('test sessions', () => {
   let cookie;
 
   beforeAll(async () => {
-    app = fastify();
+    app = fastify({
+      exposeHeadRoutes: false,
+      logger: { target: 'pino-pretty' },
+    });
     await build(app);
     await app.objection.knex.migrate.latest();
   });
