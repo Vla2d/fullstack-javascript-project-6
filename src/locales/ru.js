@@ -57,7 +57,7 @@ export default {
       },
       session: {
         new: {
-          header: 'Регистрация',
+          header: 'Вход',
           email: 'Email',
           password: 'Пароль',
           submit: 'Войти',

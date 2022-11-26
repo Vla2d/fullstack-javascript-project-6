@@ -8,16 +8,21 @@ export default (app) => {
   app.post(
     '/session',
     { name: 'session' },
-    app.fp.authenticate('local', async (requset, reply, error, user) => {
+    app.fp.authenticate('local', async (request, reply, error, user) => {
+      if (error) {
+        return app.httpErrors.internalServerError(error);
+      }
       if (!user) {
+        const signInForm = request.body.data;
         const errors = {
           email: [{ message: i18next.t('views.session.new.error') }],
         };
-        return reply.render('session/new', { errors, values: requset.body.data });
+        reply.render('session/new', { signInForm, errors });
       }
-      await requset.logIn(user);
-      requset.flash('success', i18next.t('flash.session.success'));
-      return reply.redirect(app.reverse('index'));
+      await request.logIn(user);
+      request.flash('success', i18next.t('flash.session.success'));
+      reply.redirect(app.reverse('index'));
+      return reply;
     }),
   );
   app.delete('/session', (request, reply) => {

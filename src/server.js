@@ -9,7 +9,6 @@ import fastifyObjectionjs from 'fastify-objectionjs';
 import fastifySecureSession from '@fastify/secure-session';
 import fastifyPassport from '@fastify/passport';
 import fastifySensible from '@fastify/sensible';
-import LocalStrategy from 'passport-local';
 import _ from 'lodash';
 import fastifyFormbody from '@fastify/formbody';
 import qs from 'qs';
@@ -19,6 +18,7 @@ import addRoutes from './routes/add-routes.js';
 import ru from './locales/ru.js';
 import knexConfig from '../knexfile.js';
 import models from './models/index.js';
+import getLocalStrategy from './lib/passportStrategies/LocalStrategy.js';
 
 // eslint-disable-next-line no-underscore-dangle
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -36,37 +36,42 @@ const setUpLocales = async () => {
 
 const registerPlugins = async (app) => {
   await app.register(fastifySensible);
-  await app.register(fastifyMethodOverride);
   await app.register(fastifyReverseRoutes);
   await app.register(fastifyFormbody, { parser: qs.parse });
-  await app.register(fastifyObjectionjs, {
-    knexConfig: knexConfig[mode],
-    models,
+  await app.register(fastifySecureSession, {
+    secret: process.env.SESSION_SECRET,
+    cookie: {
+      path: '/',
+    },
   });
-  await app.register(fastifySecureSession, { secret: process.env.SESSION_SECRET, cookie: { path: '/' } });
+  fastifyPassport.registerUserDeserializer(
+    (id) => app.objection.models.user.query().findById(id),
+  );
+  fastifyPassport.registerUserSerializer((user) => user.id);
   await app.register(fastifyPassport.initialize());
   await app.register(fastifyPassport.secureSession());
-  fastifyPassport.use('local', new LocalStrategy({ usernameField: 'data[email]', passwordField: 'data[password]' }, async (email, password, done) => {
-    const user = await app.objection.models.user.query().findOne({ email });
-    if (user && user.verifyPassword(password)) {
-      return done(null, user);
-    }
-    return done(null, false);
-  }));
-  fastifyPassport.registerUserSerializer(async (user) => user.id);
-  fastifyPassport.registerUserDeserializer(async (id) => {
-    const user = app.objection.models.user.query().findById(id);
-    return user;
-  });
-  // fastifyPassport.use(new FormStrategy('form', app))
+  fastifyPassport.use('local', getLocalStrategy(app));
   await app.decorate('fp', fastifyPassport);
-  await app.decorate('isAuth', (request, reply) => {
+  app.decorate('isAuth', (request, reply) => {
     if (request.isAuthenticated()) {
       return true;
     }
     request.flash('error', i18next.t('flash.authenticationError'));
     reply.redirect(app.reverse('index'));
     return false;
+  });
+  app.decorate('authenticate', (...args) => fastifyPassport.authenticate(
+    'local',
+    {
+      failureRedirect: app.reverse('index'),
+      failureFlash: i18next.t('flash.authenticationError'),
+    },
+  // @ts-ignore
+  )(...args));
+  await app.register(fastifyMethodOverride);
+  await app.register(fastifyObjectionjs, {
+    knexConfig: knexConfig[mode],
+    models,
   });
 };
 

@@ -6,7 +6,7 @@ block header
 block content
   div(class="row")
     div(class="col-4")
-      form(action="/session" method="post")
+      form(action=reverse('session') method="post")
         +input('email', 'email', t('views.session.new.email'), errors, values)
         +input('password', 'password', t('views.session.new.password'), errors)
         +submitButton(t('views.session.new.submit'))
