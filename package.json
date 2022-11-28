@@ -3,13 +3,13 @@
    "version": "1.0.0",
    "main": "src/server.js",
    "scripts": {
-      "test": "NODE_OPTIONS=--experimental-vm-modules npx jest",
-      "lint-fix": "npx eslint --fix .",
-      "build": "npx knex --esm migrate:latest & webpack",
-      "start": "npx fastify start src/server.js -l trace -P -o",
-      "create-db-migration": "npx knex --esm migrate:make $npm_config_name",
-      "db-migrate": "npx knex --esm migrate:latest",
-      "start-frontend": "npx webpack --watch --progress"
+      "test": "jest",
+      "lint-fix": "eslint --fix .",
+      "build": "knex --esm migrate:latest & webpack",
+      "start": "fastify start src/server.js -l trace -P -o",
+      "create-db-migration": "knex --esm migrate:make $npm_config_name",
+      "db-migrate": "knex --esm migrate:latest",
+      "start-frontend": "webpack --watch --progress"
    },
    "jest": {
       "modulePathIgnorePatterns": [
