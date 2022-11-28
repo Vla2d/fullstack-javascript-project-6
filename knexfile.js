@@ -12,7 +12,7 @@ export default {
   development: {
     client: 'sqlite3',
     connection: {
-      filename: join(__dirname, 'src', 'database.sqlite'),
+      filename: join(__dirname, 'db', 'database.sqlite'),
     },
     migrations,
     pool: {

@@ -123,6 +123,9 @@ const addHooks = (app) => {
 };
 
 const addHandlers = (app) => {
+  if (!process.env.ROLLBAR_ACCESS_TOKEN) {
+    return;
+  }
   const rollbar = new Rollbar({
     accessToken: process.env.ROLLBAR_ACCESS_TOKEN,
     captureUncaught: true,
