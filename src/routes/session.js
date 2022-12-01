@@ -18,6 +18,7 @@ export default (app) => {
           email: [{ message: i18next.t('views.session.new.error') }],
         };
         reply.render('session/new', { signInForm, errors });
+        return reply;
       }
       await request.logIn(user);
       request.flash('success', i18next.t('flash.session.success'));
