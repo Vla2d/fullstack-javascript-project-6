@@ -4,9 +4,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Run linter
+      - name: Install dependencies
         run: |
           make setup
+      - name : Run linter
+        run: |
           make lint
       - name: Test & publish code coverage
         uses: paambaati/codeclimate-action@v2.7.4
