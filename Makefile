@@ -8,7 +8,7 @@ start-backend:
 start-frontend:
 	npx webpack --watch --progress
 lint:
-	npx eslint .
+	npm run lint
 create-db-migration:
 	npx knex --esm migrate:make $(name)
 db-migrate:
@@ -16,6 +16,6 @@ db-migrate:
 prepare-env:
 	cp -n .env.example .env || true
 test-coverage:
-	npm run test -- --coverage
+	npm test -- --coverage
 test:
-	npm run test
+	npm test
