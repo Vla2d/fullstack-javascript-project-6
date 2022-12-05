@@ -1,18 +1,49 @@
-on: push
+name: NodeCI
+
+on: 
+  - push
+
 jobs:
   build:
+
+    # The type of machine to run the job on
     runs-on: ubuntu-latest
+
+    strategy:
+      # Node versions list
+      matrix:
+        node-version: [16.x]
+
     steps:
+        # Check-out repository under GitHub workspace
+        # https://github.com/actions/checkout
       - uses: actions/checkout@v2
-      - name: Install dependencies
+        # Step's name
+      - name: Use Node.js ${{ matrix.node-version }}
+        # Configures the node version used on GitHub-hosted runners
+        # https://github.com/actions/setup-node
+        uses: actions/setup-node@v1
+        # The Node.js version to configure
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: install dependencies
+        # Install project
         run: |
           make setup
-      - name : Run linter
+        # Add environment variables
+        env:
+          CI: true
+      - name: Run linter
+        # Run Linter
         run: |
-          make lint
-      - name: Make build, Test & publish code coverage
+          make lint 
+      - name: Make build
         run: |
           make build
+      - name: Run tests
+        run: |
+          make test
+      - name: Publish to code climate
         uses: paambaati/codeclimate-action@v2.7.4
         env:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
