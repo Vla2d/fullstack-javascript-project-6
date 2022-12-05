@@ -19,3 +19,5 @@ test-coverage:
 	npm test -- --coverage
 test:
 	npm test
+build:
+	npm run build
