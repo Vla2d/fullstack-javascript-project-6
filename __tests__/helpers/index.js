@@ -9,6 +9,6 @@ export const getSessionCookie = async (app) => {
     },
   });
   // eslint-disable-next-line no-console
-  console.log(response);
+  console.log(response.cookies);
   return {};
 };
