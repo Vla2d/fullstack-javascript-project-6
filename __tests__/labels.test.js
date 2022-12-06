@@ -3,11 +3,11 @@ import {
 } from '@jest/globals';
 import fastify from 'fastify';
 import build from '../src/server.js';
-// import { getSessionCookie } from './helpers/index.js';
+import { getSessionCookie } from './helpers/index.js';
 
 describe('test labels CRUD', () => {
   let app;
-  // let cookie;
+  let cookie;
 
   beforeAll(async () => {
     app = fastify({
@@ -16,7 +16,7 @@ describe('test labels CRUD', () => {
     });
     await build(app);
     await app.objection.knex.migrate.latest();
-    // cookie = await getSessionCookie(app);
+    cookie = await getSessionCookie(app);
   });
 
   beforeEach(async () => {
@@ -24,7 +24,7 @@ describe('test labels CRUD', () => {
   });
 
   test('test', () => {
-    expect(1).toBe(1);
+    expect(cookie).toBeTruthy();
   });
 
   afterEach(async () => {
