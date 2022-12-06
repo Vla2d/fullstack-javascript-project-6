@@ -8,7 +8,10 @@ export const getSessionCookie = async (app) => {
       data: { email: 'admin123@gmail.com', password: '123' },
     },
   });
-  // eslint-disable-next-line no-console
-  console.log(response.cookies);
+  try {
+    console.log(response.cookies);
+  } catch (err) {
+    console.error(err);
+  }
   return {};
 };
