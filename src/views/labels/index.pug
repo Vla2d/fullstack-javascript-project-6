@@ -18,4 +18,9 @@ block content
             td=label.id
             td=label.name
             td=label.createdAt
-            td!=`<div class="d-flex flex-wrap"><a class="btn btn-primary me-1" href="${reverse('editLabel', { id: label.id })}">${t('views.labels.index.change')}</a><form action="${reverse('deleteLabel', { id: label.id })}" method="post"><input name="_method" type="hidden" value="delete"><input class="btn btn-danger" type="submit" value=${t('views.labels.index.delete')}></form></div>`
+            td
+              .d-flex.flex-wrap
+                a.btn.btn-primary.me-1(href=reverse('editLabel', { id: label.id }))=t('views.labels.index.change')
+                form(action=reverse('deleteLabel', { id: label.id }) method='post')
+                  input(name='_method' type='hidden' value='delete')
+                  input.btn.btn-danger(type='submit' value=t('views.labels.index.delete'))

@@ -40,4 +40,9 @@ block content
             else
               td
             td=task.createdAt
-            td!=`<div class="d-flex flex-wrap"><a class="btn btn-primary me-1" href="${reverse('editTask', { id: task.id })}">${t('views.tasks.index.change')}</a><form action="${reverse('deleteTask', { id: task.id })}" method="post"><input name="_method" type="hidden" value="delete"><input class="btn btn-danger" type="submit" value=${t('views.tasks.index.delete')}></form></div>`
+            td
+              .d-flex.flex-wrap
+                a.btn.btn-primary.me-1(href=reverse('editTask', { id: task.id }))=t('views.tasks.index.change')
+                form(action=reverse('deleteTask', { id: task.id }) method='post')
+                  input(name='_method' type='hidden' value='delete')
+                  input.btn.btn-danger(type='submit' value=t('views.tasks.index.delete'))

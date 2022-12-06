@@ -19,4 +19,9 @@ block content
             td=status.id
             td=status.name
             td=status.createdAt
-            td!=`<div class="d-flex flex-wrap"><a class="btn btn-primary me-1" href="${reverse('editStatus', { id: status.id })}">${t('views.statuses.index.change')}</a><form action="${reverse('deleteStatus', { id: status.id })}" method="post"><input name="_method" type="hidden" value="delete"><input class="btn btn-danger" type="submit" value=${t('views.statuses.index.delete')}></form></div>`
+            td
+              .d-flex.flex-wrap
+                a.btn.btn-primary.me-1(href=reverse('editStatus', { id: status.id }))=t('views.statuses.index.change')
+                form(action=reverse('deleteStatus', { id: status.id }) method='post')
+                  input(name='_method' type='hidden' value='delete')
+                  input.btn.btn-danger(type='submit' value=t('views.statuses.index.delete'))
