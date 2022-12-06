@@ -12,12 +12,11 @@ export default (app) => {
     const creator = request.query.isCreatorUser === 'on' ? request.user.id : undefined;
     const tasks = await app.objection.models.task.query()
       .withGraphJoined('[taskStatus, creator, executor, labels]')
-      .skipUndefined()
       .modify((queryBuilder) => {
-        queryBuilder.where('task_status.id', '=', status);
-        queryBuilder.where('executor.id', '=', executor);
-        queryBuilder.where('labels.id', '=', label);
-        queryBuilder.where('creator.id', '=', creator);
+        if (status) queryBuilder.where('task_status.id', '=', status);
+        if (executor) queryBuilder.where('executor.id', '=', executor);
+        if (label) queryBuilder.where('labels.id', '=', label);
+        if (creator) queryBuilder.where('creator.id', '=', creator);
       });
     const statuses = await app.objection.models.taskStatus.query();
     const labels = await app.objection.models.label.query();
