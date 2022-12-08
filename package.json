@@ -3,7 +3,7 @@
    "version": "1.0.0",
    "main": "src/server.js",
    "scripts": {
-      "test": "jest --verbose --runInBand",
+      "test": "jest --verbose --maxWorkers=3",
       "lint": "eslint .",
       "lint-fix": "eslint --fix .",
       "build": "knex --esm migrate:latest & webpack",
