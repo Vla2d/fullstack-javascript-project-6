@@ -19,11 +19,7 @@ describe('test users CRUD', () => {
   });
 
   beforeEach(async () => {
-    try {
-      cookie = await getSessionCookie(app);
-    } catch (e) {
-      console.error(e);
-    }
+    cookie = await getSessionCookie(app);
   });
 
   test('GET /users/new', async () => {

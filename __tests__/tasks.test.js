@@ -16,11 +16,7 @@ describe('test tasks CRUD', () => {
     });
     await build(app);
     await app.objection.knex.migrate.latest();
-    try {
-      cookie = await getSessionCookie(app);
-    } catch (e) {
-      console.error(e);
-    }
+    cookie = await getSessionCookie(app);
   });
 
   test('GET /tasks', async () => {

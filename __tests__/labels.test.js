@@ -16,11 +16,7 @@ describe('test labels CRUD', () => {
     });
     await build(app);
     await app.objection.knex.migrate.latest();
-    try {
-      cookie = await getSessionCookie(app);
-    } catch (e) {
-      console.error(e);
-    }
+    cookie = await getSessionCookie(app);
   });
 
   beforeEach(async () => {
