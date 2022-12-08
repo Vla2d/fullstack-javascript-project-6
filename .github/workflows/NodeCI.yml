@@ -37,12 +37,6 @@ jobs:
         # Run Linter
         run: |
           make lint 
-      - name: Make build
-        run: |
-          make build
-      - name: Run tests
-        run: |
-          make test
       - name: Publish to code climate
         uses: paambaati/codeclimate-action@v2.7.4
         env:
