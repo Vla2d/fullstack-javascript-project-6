@@ -8,8 +8,8 @@ export const getSessionCookie = async (app) => {
       data: { email: 'admin123@gmail.com', password: '123' },
     },
   });
-
-  const [sessionCookie] = response.cookies;
-  const { name, value } = sessionCookie;
-  return { [name]: value };
+  return {}
+  // const [sessionCookie] = response.cookies;
+  // const { name, value } = sessionCookie;
+  // return { [name]: value };
 };
