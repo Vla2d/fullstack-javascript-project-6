@@ -13,5 +13,4 @@ export const getSessionCookie = async (app) => {
   } catch (err) {
     console.error(err);
   }
-  return {};
 };

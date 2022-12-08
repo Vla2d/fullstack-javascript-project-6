@@ -5,7 +5,7 @@ import fastify from 'fastify';
 import build from '../src/server.js';
 import { getSessionCookie } from './helpers/index.js';
 
-describe('test labels CRUD', () => {
+describe('test statuses CRUD with login', () => {
   let app;
   let cookie;
 
@@ -20,102 +20,102 @@ describe('test labels CRUD', () => {
   });
 
   beforeEach(async () => {
-    await app.objection.knex('labels').insert({ name: 'Новая' });
+    await app.objection.knex('task_statuses').insert({ name: 'новый' });
   });
 
-  test('GET /labels', async () => {
+  test('GET /statuses', async () => {
     const response = await app.inject({
       method: 'GET',
-      url: '/labels',
+      url: '/statuses',
     });
     expect(response.statusCode).toBe(302);
   });
 
-  test('GET /labels/new', async () => {
+  test('GET /statuses/new', async () => {
     const response = await app.inject({
       method: 'GET',
-      url: '/labels/new',
+      url: '/statuses/new',
     });
     expect(response.statusCode).toBe(302);
   });
 
-  test('GET /labels/1/edit', async () => {
+  test('GET /statuses/1/edit', async () => {
     const response = await app.inject({
       method: 'GET',
-      url: '/labels/1/edit',
+      url: '/statuses/1/edit',
     });
     expect(response.statusCode).toBe(302);
   });
 
-  test('PATCH /labels/1', async () => {
+  test('PATCH /statuses/1', async () => {
     const response = await app.inject({
       method: 'PATCH',
-      url: '/labels/1',
+      url: '/statuses/1',
     });
     expect(response.statusCode).toBe(302);
   });
 
-  test('DELETE /labels/1', async () => {
+  test('DELETE /users/1', async () => {
     const response = await app.inject({
       method: 'DELETE',
-      url: '/labels/1',
+      url: '/statuses/1',
     });
     expect(response.statusCode).toBe(302);
   });
 
-  test('DELETE /labels', async () => {
+  test('DELETE /statuses', async () => {
     await app.inject({
       method: 'DELETE',
-      url: '/labels/1',
+      url: '/statuses/1',
       cookies: cookie,
     });
-    const users = await app.objection.models.label.query();
+    const users = await app.objection.models.taskStatus.query();
     expect(users).toEqual([]);
   });
 
-  test('GET /labels', async () => {
+  test('GET /statuses', async () => {
     const response = await app.inject({
       method: 'GET',
-      url: '/labels',
+      url: '/statuses',
       cookies: cookie,
     });
     expect(response.statusCode).toBe(200);
   });
 
-  test('POST /labels', async () => {
+  test('POST /statuses', async () => {
     await app.inject({
       method: 'POST',
-      url: '/labels',
+      url: '/statuses',
       payload: {
         data: {
-          name: 'Cрочно сделать',
+          name: 'На тестировании',
         },
       },
       cookies: cookie,
     });
-    const taskStatus = await app.objection.models.label.query().findById(2);
+    const taskStatus = await app.objection.models.taskStatus.query().findById(2);
     const { name } = taskStatus;
-    expect(name).toBe('Cрочно сделать');
+    expect(name).toBe('На тестировании');
   });
 
-  test('PATCH /labels', async () => {
+  test('PATCH /statuses', async () => {
     await app.inject({
       method: 'PATCH',
-      url: '/labels/1',
+      url: '/statuses/1',
       cookies: cookie,
       payload: {
         data: {
-          name: 'Переделать',
+          name: 'В работе',
         },
       },
     });
-    const taskStatus = await app.objection.models.label.query().findById(1);
+    const taskStatus = await app.objection.models.taskStatus.query().findById(1);
     const { name } = taskStatus;
-    expect(name).toBe('Переделать');
+    expect(name).toBe('В работе');
   });
 
   afterEach(async () => {
-    await app.objection.knex('labels').truncate();
+    await app.objection.knex('task_statuses').truncate();
   });
 
   afterAll(async () => {
