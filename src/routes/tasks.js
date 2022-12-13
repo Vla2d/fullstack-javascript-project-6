@@ -126,7 +126,7 @@ export default (app) => {
   app.delete('/tasks/:id', { name: 'deleteTask', preValidation: app.fp.isAuth }, async (request, reply) => {
     const { id } = request.params;
     const task = await app.objection.models.task.query().findById(id);
-    console.log(request.user.id !== task.creatorId);
+
     if (request.user.id !== task.creatorId) {
       request.flash('error', i18next.t('flash.tasks.authorizationError'));
       reply.code(403);
