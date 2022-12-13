@@ -11,7 +11,7 @@ describe('statuses CRUD', () => {
   let app;
   let knex;
   const testData = getTestData();
-  const requiredDataToPrepare = ['users', 'tasks', 'task_statuses', 'labels', 'tasks_labels'];
+  const requiredDataToPrepare = ['users'];
 
   beforeAll(async () => {
     const appBuild = fastify({

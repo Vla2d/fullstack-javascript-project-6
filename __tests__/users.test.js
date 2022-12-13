@@ -15,7 +15,7 @@ describe('statuses CRUD', () => {
   let models;
   let cookie;
   const testData = getTestData();
-  const requiredDataToPrepare = ['users', 'tasks', 'task_statuses', 'labels', 'tasks_labels'];
+  const requiredDataToPrepare = ['users'];
 
   const existedUser = testData.users.existing;
 

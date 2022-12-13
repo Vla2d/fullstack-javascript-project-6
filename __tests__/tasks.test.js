@@ -14,7 +14,7 @@ describe('statuses CRUD', () => {
   let models;
   let cookie;
   const testData = getTestData();
-  const requiredDataToPrepare = ['users', 'tasks', 'task_statuses', 'labels', 'tasks_labels'];
+  const requiredDataToPrepare = ['users', 'tasks', 'task_statuses', 'labels'];
 
   beforeAll(async () => {
     const appBuild = fastify({
