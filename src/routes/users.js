@@ -9,11 +9,7 @@ export default (app) => {
   app.get('/users/new', { name: 'newUser' }, (request, reply) => {
     reply.render('users/new');
   });
-  app.get('/users/:id/edit', { name: 'editUser' }, async (request, reply) => {
-    if (!app.isAuth(request, reply)) {
-      return reply;
-    }
-
+  app.get('/users/:id/edit', { name: 'editUser'/* , preValidation: app.authenticate */ }, async (request, reply) => {
     const { id } = request.params;
     if (String(request.user.id) !== id) {
       request.flash('error', i18next.t('flash.users.authorizationError'));
@@ -23,6 +19,7 @@ export default (app) => {
 
     const user = await app.objection.models.user.query().findById(id);
     reply.render('users/edit', { user });
+    reply.code(302);
     return reply;
   });
   app.post('/users', async (request, reply) => {
@@ -37,11 +34,7 @@ export default (app) => {
     }
     return reply;
   });
-  app.patch('/users/:id', async (request, reply) => {
-    if (!app.isAuth(request, reply)) {
-      return reply;
-    }
-
+  app.patch('/users/:id', { name: 'updateUserData'/* , preValidation: app.authenticate */ }, async (request, reply) => {
     try {
       const { id } = request.params;
       const user = new app.objection.models.user();
@@ -52,14 +45,11 @@ export default (app) => {
     } catch (errors) {
       request.flash('error', i18next.t('flash.users.editError'));
       reply.render('users/edit', { user: request.body.data, errors: errors.data });
+      reply.code(422);
     }
     return reply;
   });
-  app.delete('/users/:id', { name: 'deleteUser' }, async (request, reply) => {
-    if (!app.isAuth(request, reply)) {
-      return reply;
-    }
-
+  app.delete('/users/:id', { name: 'deleteUser' /* preValidation: app.authenticate */ }, async (request, reply) => {
     const { id } = request.params;
     if (String(request.user.id) !== id) {
       request.flash('error', i18next.t('flash.users.authorizationError'));
@@ -73,6 +63,7 @@ export default (app) => {
       request.flash('success', i18next.t('flash.users.delete'));
     } catch (error) {
       request.flash('error', i18next.t('flash.users.deleteError'));
+      reply.code(422);
     }
     reply.redirect(app.reverse('users'));
     return reply;

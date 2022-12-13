@@ -8,6 +8,8 @@ parserOptions:
   sourceType: module
 rules:
   import/extensions: 0
+  no-console: 0
+  no-underscore-dangle: [2, { "allow": ["__filename", "__dirname"] }]
   new-cap:
     - error
     - properties: false

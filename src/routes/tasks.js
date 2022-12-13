@@ -1,11 +1,7 @@
 import i18next from 'i18next';
 
 export default (app) => {
-  app.get('/tasks', { name: 'tasks' }, async (request, reply) => {
-    if (!app.isAuth(request, reply)) {
-      return reply;
-    }
-
+  app.get('/tasks', { name: 'tasks', preValidation: app.fp.isAuth }, async (request, reply) => {
     const status = request.query.status || undefined;
     const executor = request.query.executor || undefined;
     const label = request.query.label || undefined;
@@ -31,22 +27,14 @@ export default (app) => {
     });
     return reply;
   });
-  app.get('/tasks/new', { name: 'newTask' }, async (request, reply) => {
-    if (!app.isAuth(request, reply)) {
-      return reply;
-    }
-
+  app.get('/tasks/new', { name: 'newTask', preValidation: app.fp.isAuth }, async (request, reply) => {
     const users = await app.objection.models.user.query();
     const statuses = await app.objection.models.taskStatus.query();
     const labels = await app.objection.models.label.query();
     reply.render('tasks/new', { users, statuses, labels });
     return reply;
   });
-  app.get('/tasks/:id/edit', { name: 'editTask' }, async (request, reply) => {
-    if (!app.isAuth(request, reply)) {
-      return reply;
-    }
-
+  app.get('/tasks/:id/edit', { name: 'editTask', preValidation: app.fp.isAuth }, async (request, reply) => {
     const { id } = request.params;
     const task = await app.objection.models.task.query().findById(id).withGraphJoined('[taskStatus, creator, executor, labels]');
     const selectedLabels = task.labels.map((label) => String(label.id));
@@ -61,21 +49,13 @@ export default (app) => {
     });
     return reply;
   });
-  app.get('/tasks/:id', async (request, reply) => {
-    if (!app.isAuth(request, reply)) {
-      return reply;
-    }
-
+  app.get('/tasks/:id', { name: 'showTask', preValidation: app.fp.isAuth }, async (request, reply) => {
     const { id } = request.params;
     const task = await app.objection.models.task.query().findById(id).withGraphJoined('[taskStatus, creator, executor, labels]');
     reply.render('tasks/view', { task });
     return reply;
   });
-  app.post('/tasks', async (request, reply) => {
-    if (!app.isAuth(request, reply)) {
-      return reply;
-    }
-
+  app.post('/tasks', { name: 'createTask', preValidation: app.fp.isAuth }, async (request, reply) => {
     try {
       await app.objection.models.task.transaction(async (trx) => {
         const creatorId = String(request.user.id);
@@ -106,14 +86,11 @@ export default (app) => {
         statuses,
         labels,
       });
+      reply.code(422);
     }
     return reply;
   });
-  app.patch('/tasks/:id', { name: 'task' }, async (request, reply) => {
-    if (!app.isAuth(request, reply)) {
-      return reply;
-    }
-
+  app.patch('/tasks/:id', { name: 'updateTask', preValidation: app.fp.isAuth }, async (request, reply) => {
     const { id } = request.params;
     try {
       await app.objection.models.task.transaction(async (trx) => {
@@ -121,7 +98,6 @@ export default (app) => {
         task.$set({ id, ...request.body.data });
         const executorId = request.body.data.executorId || undefined;
         await task.$query(trx).findById(id).patch({ ...request.body.data, executorId });
-
         if (request.body.data.labels) {
           await task.$relatedQuery('labels', trx).unrelate();
           const labels = [...request.body.data.labels];
@@ -143,18 +119,17 @@ export default (app) => {
         labels,
         errors: errors.data,
       });
+      reply.code(422);
     }
     return reply;
   });
-  app.delete('/tasks/:id', { name: 'deleteTask' }, async (request, reply) => {
-    if (!app.isAuth(request, reply)) {
-      return reply;
-    }
-
+  app.delete('/tasks/:id', { name: 'deleteTask', preValidation: app.fp.isAuth }, async (request, reply) => {
     const { id } = request.params;
     const task = await app.objection.models.task.query().findById(id);
+    console.log(request.user.id !== task.creatorId);
     if (request.user.id !== task.creatorId) {
       request.flash('error', i18next.t('flash.tasks.authorizationError'));
+      reply.code(403);
       reply.redirect(app.reverse('tasks'));
       return reply;
     }
@@ -162,6 +137,7 @@ export default (app) => {
     await task.$relatedQuery('labels').unrelate();
     await app.objection.models.task.query().deleteById(id);
     request.flash('success', i18next.t('flash.tasks.delete'));
+
     reply.redirect(app.reverse('tasks'));
     return reply;
   });

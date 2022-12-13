@@ -6,7 +6,7 @@ block header
 block content
   div(class="row")
     div(class="col-4")
-      form(action="/labels/" + label.id method="post")
+      form(action=reverse('updateLabel', { id: label.id }) method="post")
         +input('text', 'name', t('views.labels.edit.name'), errors, label)
         div(class="form-floating mb-3")
           input(type="hidden" name="_method" value="patch")

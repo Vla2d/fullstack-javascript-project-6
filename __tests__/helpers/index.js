@@ -1,14 +1,35 @@
-// eslint-disable-next-line import/prefer-default-export
-export const getSessionCookie = async (app) => {
-  await app.objection.knex('users').insert({ email: 'admin123@gmail.com', password_digest: 'a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3' });
+import fs from 'fs';
+import { fileURLToPath } from 'url';
+import path, { dirname } from 'path';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+const getFixturePath = (filename) => path.join(__dirname, '..', '..', '__fixtures__', filename);
+const readFixture = (filename) => fs.readFileSync(getFixturePath(filename), 'utf-8').trim();
+const getFixtureData = (filename) => JSON.parse(readFixture(filename));
+
+export const getTestData = () => getFixtureData('testData.json');
+
+export const prepareData = async (dataTypes, app) => {
+  const { knex } = app.objection;
+
+  dataTypes.map(async (dataType) => {
+    await knex(dataType).insert(getFixtureData(`${dataType}.json`));
+  });
+};
+
+export const signIn = async (app, data) => {
   const response = await app.inject({
     method: 'POST',
-    url: '/session',
+    url: app.reverse('session'),
     payload: {
-      data: { email: 'admin123@gmail.com', password: '123' },
+      data,
     },
   });
+
   const [sessionCookie] = response.cookies;
   const { name, value } = sessionCookie;
-  return { [name]: value };
+  const cookie = { [name]: value };
+  return cookie;
 };

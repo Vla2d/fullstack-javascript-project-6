@@ -1,41 +1,52 @@
 import {
-  describe, beforeAll, beforeEach, test, expect, afterEach, afterAll,
+  describe, beforeAll, it, expect, afterAll,
 } from '@jest/globals';
 import fastify from 'fastify';
 import build from '../src/server.js';
+import {
+  getTestData, prepareData, signIn,
+} from './helpers/index.js';
 
-describe('test sessions', () => {
+describe('statuses CRUD', () => {
   let app;
-  let cookie;
+  let knex;
+  const testData = getTestData();
+  const requiredDataToPrepare = ['users', 'tasks', 'task_statuses', 'labels', 'tasks_labels'];
 
   beforeAll(async () => {
-    app = fastify({
+    const appBuild = fastify({
       exposeHeadRoutes: false,
       logger: { target: 'pino-pretty' },
     });
-    await build(app);
-    await app.objection.knex.migrate.latest();
+    app = await build(appBuild);
+    knex = app.objection.knex;
+
+    await knex.migrate.latest();
+    await prepareData(requiredDataToPrepare, app);
   });
 
-  beforeEach(async () => {
-    await app.objection.knex('users').insert({ email: 'admin123@gmail.com', password_digest: 'a665a45920422f9d417e4867efdc4fb8a04a1f3fff1fa07e998e86f7f7a27ae3' });
+  it('shows login page', async () => {
+    const response = await app.inject({
+      method: 'GET',
+      url: app.reverse('newSession'),
+    });
+    expect(response.statusCode).toBe(200);
   });
 
-  test('POST and DELETE /session', async () => {
+  it('signs in', async () => {
     const responseSignIn = await app.inject({
       method: 'POST',
       url: app.reverse('session'),
       payload: {
-        data: {
-          email: 'admin123@gmail.com',
-          password: '123',
-        },
+        data: testData.users.existing,
       },
     });
-    expect(responseSignIn.headers.location).toBe(app.reverse('index'));
-    const [sessionCookie] = responseSignIn.cookies;
-    const { name, value } = sessionCookie;
-    cookie = { [name]: value };
+
+    expect(responseSignIn.statusCode).toBe(302);
+  });
+
+  it('signs out', async () => {
+    const cookie = await signIn(app, testData.users.existing);
 
     const responseSignOut = await app.inject({
       method: 'DELETE',
@@ -45,33 +56,7 @@ describe('test sessions', () => {
     expect(responseSignOut.statusCode).toBe(302);
   });
 
-  test('POST with incorrect password', async () => {
-    const responseSignIn = await app.inject({
-      method: 'POST',
-      url: app.reverse('session'),
-      payload: {
-        data: {
-          email: 'admin123@gmail.com',
-          password: '1234',
-        },
-      },
-    });
-    expect(responseSignIn.raw.req.url).toBe(app.reverse('session'));
-  });
-
-  test('GET /session/new', async () => {
-    const response = await app.inject({
-      method: 'GET',
-      url: app.reverse('newSession'),
-    });
-    expect(response.statusCode).toBe(200);
-  });
-
-  afterEach(async () => {
-    await app.objection.knex('users').truncate();
-  });
-
-  afterAll(async () => {
-    await app.close();
+  afterAll(() => {
+    app.close();
   });
 });

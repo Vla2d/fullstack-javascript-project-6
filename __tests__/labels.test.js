@@ -1,121 +1,104 @@
 import {
-  describe, beforeAll, beforeEach, test, expect, afterEach, afterAll,
+  describe, beforeAll, it, expect, afterAll,
 } from '@jest/globals';
 import fastify from 'fastify';
 import build from '../src/server.js';
-import { getSessionCookie } from './helpers/index.js';
+import {
+  getTestData, prepareData, signIn,
+} from './helpers/index.js';
 
-describe('test labels CRUD', () => {
+describe('Labels CRUD tests:', () => {
   let app;
+  let knex;
+  let models;
   let cookie;
+  const testData = getTestData();
+  const requiredDataToPrepare = ['users', 'labels'];
 
   beforeAll(async () => {
-    app = fastify({
+    const appBuild = fastify({
       exposeHeadRoutes: false,
       logger: { target: 'pino-pretty' },
     });
-    await build(app);
-    await app.objection.knex.migrate.latest();
-    cookie = await getSessionCookie(app);
+    app = await build(appBuild);
+    knex = app.objection.knex;
+    models = app.objection.models;
+
+    await knex.migrate.latest();
+    await prepareData(requiredDataToPrepare, app);
+    cookie = await signIn(app, testData.users.existing);
   });
 
-  beforeEach(async () => {
-    await app.objection.knex('labels').insert({ name: 'Новая' });
-  });
-
-  test('GET /labels', async () => {
+  it('shows labels page', async () => {
     const response = await app.inject({
       method: 'GET',
-      url: '/labels',
-    });
-    expect(response.statusCode).toBe(302);
-  });
-
-  test('GET /labels/new', async () => {
-    const response = await app.inject({
-      method: 'GET',
-      url: '/labels/new',
-    });
-    expect(response.statusCode).toBe(302);
-  });
-
-  test('GET /labels/1/edit', async () => {
-    const response = await app.inject({
-      method: 'GET',
-      url: '/labels/1/edit',
-    });
-    expect(response.statusCode).toBe(302);
-  });
-
-  test('PATCH /labels/1', async () => {
-    const response = await app.inject({
-      method: 'PATCH',
-      url: '/labels/1',
-    });
-    expect(response.statusCode).toBe(302);
-  });
-
-  test('DELETE /labels/1', async () => {
-    const response = await app.inject({
-      method: 'DELETE',
-      url: '/labels/1',
-    });
-    expect(response.statusCode).toBe(302);
-  });
-
-  test('DELETE /labels', async () => {
-    await app.inject({
-      method: 'DELETE',
-      url: '/labels/1',
-      cookies: cookie,
-    });
-    const users = await app.objection.models.label.query();
-    expect(users).toEqual([]);
-  });
-
-  test('GET /labels', async () => {
-    const response = await app.inject({
-      method: 'GET',
-      url: '/labels',
+      url: app.reverse('labels'),
       cookies: cookie,
     });
     expect(response.statusCode).toBe(200);
   });
 
-  test('POST /labels', async () => {
-    await app.inject({
+  it('shows create new label page', async () => {
+    const response = await app.inject({
+      method: 'GET',
+      url: app.reverse('newLabel'),
+      cookies: cookie,
+    });
+    expect(response.statusCode).toBe(200);
+  });
+
+  it('shows existing label edit page', async () => {
+    const response = await app.inject({
+      method: 'GET',
+      url: app.reverse('editLabel', { id: testData.labels.existing.id }),
+      cookies: cookie,
+    });
+    expect(response.statusCode).toBe(200);
+  });
+
+  it('creates new label', async () => {
+    const newLabel = testData.labels.new;
+
+    const response = await app.inject({
       method: 'POST',
-      url: '/labels',
-      payload: {
-        data: {
-          name: 'Cрочно сделать',
-        },
-      },
+      url: app.reverse('labels'),
       cookies: cookie,
+      payload: {
+        data: newLabel,
+      },
     });
-    const taskStatus = await app.objection.models.label.query().findById(2);
-    const { name } = taskStatus;
-    expect(name).toBe('Cрочно сделать');
+    expect(response.statusCode).toBe(302);
+
+    const label = await models.label.query().findOne({ name: newLabel.name });
+    expect(label).toMatchObject(newLabel);
   });
 
-  test('PATCH /labels', async () => {
-    await app.inject({
+  it('updates existing label', async () => {
+    const updatedData = { name: 'wontfix' };
+    const response = await app.inject({
       method: 'PATCH',
-      url: '/labels/1',
+      url: app.reverse('updateLabel', { id: testData.labels.existing.id }),
       cookies: cookie,
       payload: {
-        data: {
-          name: 'Переделать',
-        },
+        data: updatedData,
       },
     });
-    const taskStatus = await app.objection.models.label.query().findById(1);
-    const { name } = taskStatus;
-    expect(name).toBe('Переделать');
+    expect(response.statusCode).toBe(302);
+
+    const label = await models.label.query().findById(testData.labels.existing.id);
+    expect(label).toMatchObject({ ...testData.labels.existing, ...updatedData });
   });
 
-  afterEach(async () => {
-    await app.objection.knex('labels').truncate();
+  it('removes existing label', async () => {
+    const response = await app.inject({
+      method: 'DELETE',
+      url: app.reverse('deleteLabel', { id: testData.labels.existing.id }),
+      cookies: cookie,
+    });
+    expect(response.statusCode).toBe(302);
+
+    const label = await models.label.query().findById(testData.labels.existing.id);
+    expect(label).toBeUndefined();
   });
 
   afterAll(async () => {

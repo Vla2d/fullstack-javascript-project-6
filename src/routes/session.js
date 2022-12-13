@@ -17,6 +17,7 @@ export default (app) => {
         const errors = {
           email: [{ message: i18next.t('views.session.new.error') }],
         };
+        reply.code(422);
         reply.render('session/new', { signInForm, errors });
         return reply;
       }

@@ -3,7 +3,7 @@
    "version": "1.0.0",
    "main": "src/server.js",
    "scripts": {
-      "test": "jest --verbose --maxWorkers=50%",
+      "test": "jest --verbose --maxWorkers=1",
       "lint": "eslint .",
       "lint-fix": "eslint --fix .",
       "build": "knex --esm migrate:latest & webpack",

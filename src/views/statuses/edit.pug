@@ -6,7 +6,7 @@ block header
 block content
   div(class="row")
     div(class="col-4")
-      form(action=`${reverse('statuses')}/${status.id}` method="post")
+      form(action=reverse('updateStatus', { id: status.id }) method="post")
         +input('text', 'name', t('views.statuses.edit.name'), errors, status)
         div(class="form-floating mb-3")
           input(type="hidden" name="_method" value="patch")

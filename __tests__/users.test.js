@@ -1,121 +1,124 @@
 import {
-  describe, beforeAll, beforeEach, test, expect, afterEach, afterAll,
+  describe, beforeAll, it, expect, afterAll,
 } from '@jest/globals';
 import fastify from 'fastify';
+import _ from 'lodash';
 import build from '../src/server.js';
-import { getSessionCookie } from './helpers/index.js';
+import encrypt from '../src/lib/secure.js';
+import {
+  getTestData, prepareData, signIn,
+} from './helpers/index.js';
 
-describe('test users CRUD', () => {
+describe('statuses CRUD', () => {
   let app;
+  let knex;
+  let models;
   let cookie;
+  const testData = getTestData();
+  const requiredDataToPrepare = ['users', 'tasks', 'task_statuses', 'labels', 'tasks_labels'];
+
+  const existedUser = testData.users.existing;
 
   beforeAll(async () => {
-    app = fastify({
+    const appBuild = fastify({
       exposeHeadRoutes: false,
       logger: { target: 'pino-pretty' },
     });
-    await build(app);
-    await app.objection.knex.migrate.latest();
+    app = await build(appBuild);
+    knex = app.objection.knex;
+    models = app.objection.models;
+
+    await knex.migrate.latest();
+    await prepareData(requiredDataToPrepare, app);
+    cookie = await signIn(app, testData.users.existing);
   });
 
-  beforeEach(async () => {
-    cookie = await getSessionCookie(app);
-  });
-
-  test('GET /users/new', async () => {
+  it('shows users page', async () => {
     const response = await app.inject({
       method: 'GET',
-      url: '/users/new',
+      url: app.reverse('users'),
     });
     expect(response.statusCode).toBe(200);
   });
 
-  test('GET /users/1/edit', async () => {
+  it('shows sign up page', async () => {
     const response = await app.inject({
       method: 'GET',
-      url: '/users/1/edit',
-    });
-    expect(response.statusCode).toBe(302);
-  });
-
-  test('PATCH /users/1', async () => {
-    const response = await app.inject({
-      method: 'PATCH',
-      url: '/users/1',
-    });
-    expect(response.statusCode).toBe(302);
-  });
-
-  test('DELETE /users/1', async () => {
-    const response = await app.inject({
-      method: 'DELETE',
-      url: '/users/1',
-    });
-    expect(response.statusCode).toBe(302);
-  });
-
-  test('GET /users', async () => {
-    const response = await app.inject({
-      method: 'GET',
-      url: '/users',
-      cookies: cookie,
+      url: app.reverse('newUser'),
     });
     expect(response.statusCode).toBe(200);
   });
 
-  test('DELETE /users', async () => {
-    await app.inject({
-      method: 'DELETE',
-      url: '/users/1',
-      cookies: cookie,
-    });
-    const users = await app.objection.models.user.query();
-    expect(users).toEqual([]);
-  });
-
-  test('PATCH /users', async () => {
-    await app.inject({
-      method: 'PATCH',
-      url: '/users/1',
-      cookies: cookie,
-      payload: {
-        data: {
-          firstName: 'admin123',
-          lastName: 'admin123',
-          email: 'admin123@gmail.com',
-          password: '123',
-        },
-      },
-    });
-    const user = await app.objection.models.user.query().findById(1);
-    const { firstName } = user;
-    expect(firstName).toBe('admin123');
-  });
-
-  test('POST /users', async () => {
-    await app.inject({
+  it('creates user', async () => {
+    const newUserData = testData.users.new;
+    const response = await app.inject({
       method: 'POST',
-      url: '/users',
+      url: app.reverse('users'),
+      cookies: cookie,
       payload: {
-        data: {
-          firstName: 'admin1234',
-          lastName: 'admin1234',
-          email: 'admin1234@gmail.com',
-          password: '123',
-        },
+        data: newUserData,
       },
     });
+    expect(response.statusCode).toBe(302);
 
-    const user = await app.objection.models.user.query().findById(2);
-    const { email } = user;
-    expect(email).toBe('admin1234@gmail.com');
+    const expected = {
+      ..._.omit(newUserData, 'password'),
+      passwordDigest: encrypt(newUserData.password),
+    };
+    const user = await models.user.query().findOne({ email: newUserData.email });
+    expect(user).toMatchObject(expected);
   });
 
-  afterEach(async () => {
-    await app.objection.knex('users').truncate();
+  it('shows existing user edit page', async () => {
+    const response = await app.inject({
+      method: 'GET',
+      url: app.reverse('editUser', { id: existedUser.id }),
+      cookies: cookie,
+    });
+
+    expect(response.statusCode).toBe(302);
   });
 
-  afterAll(async () => {
-    await app.close();
+  it('edits user own account', async () => {
+    const newData = {
+      firstName: 'Napoleon',
+      lastName: 'Bonaparte',
+      email: 'war@di.com',
+      password: 'password',
+    };
+
+    const response = await app.inject({
+      method: 'PATCH',
+      url: app.reverse('updateUserData', { id: existedUser.id }),
+      cookies: cookie,
+      payload: {
+        data: newData,
+      },
+    });
+    expect(response.statusCode).toBe(302);
+
+    const userData = await models.user.query().findById(existedUser.id);
+    const expected = {
+      ..._.omit(newData, 'password'),
+      passwordDigest: encrypt(newData.password),
+    };
+    expect(userData).toMatchObject(expected);
+  });
+
+  it('deletes user own account', async () => {
+    const response = await app.inject({
+      method: 'DELETE',
+      url: app.reverse('deleteUser', { id: existedUser.id }),
+      cookies: cookie,
+    });
+
+    expect(response.statusCode).toBe(302);
+
+    const user = await models.user.query().findById(existedUser.id);
+    expect(user).toBeUndefined();
+  });
+
+  afterAll(() => {
+    app.close();
   });
 });

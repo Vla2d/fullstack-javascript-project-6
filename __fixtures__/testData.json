@@ -1,0 +1,82 @@
+{
+  "users": {
+    "new": {
+      "firstName": "Malika",
+      "lastName": "Hodkiewich",
+      "email": "malika_hodkiewicz75@live.com",
+      "password": "RLJvaIgPOnX5r03"
+    },
+    "existing": {
+      "firstName": "Lawrence",
+      "lastName": "Kulas",
+      "email": "lawrence.kulas87@outlook.com",
+      "password": "O6AvLIQL1cbzrre",
+      "id": 7
+    },
+    "existing2": {
+      "firstName": "Nona",
+      "lastName": "Murray",
+      "email": "nona_murray@yahoo.com",
+      "password": "3c1fd781053afcf86f",
+      "id": 9
+    },
+    "existing3": {
+      "firstName": "bob",
+      "lastName": "marley",
+      "email": "bob@marley.com",
+      "password": "bobmarley",
+      "id": 1
+    }
+  },
+
+  "statuses": {
+    "new": {
+      "name": "todo"
+    },
+    "existing": {
+      "name": "in process",
+      "id": 3
+    },
+    "existing2": {
+      "name": "finished",
+      "id": 7
+    }
+  },
+
+  "tasks": {
+    "new": {
+      "name": "Fix bug",
+      "description": "Find and fix bug",
+      "creatorId": 7,
+      "statusId": 3
+    },
+    "existing": {
+      "name": "prepare environment",
+      "statusId": 7,
+      "creatorId": 7,
+      "executorId": 9,
+      "id": 3
+    },
+    "existing2": {
+      "name": "refactor",
+      "description": "do refactoring",
+      "statusId": 7,
+      "creatorId": 9,
+      "id": 2
+    }
+  },
+
+  "labels": {
+    "new": {
+      "name": "documentation"
+    },
+    "existing": {
+      "name": "question",
+      "id": 1
+    },
+    "existing2": {
+      "name": "invalid",
+      "id": 2
+    }
+  }
+}

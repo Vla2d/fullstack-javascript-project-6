@@ -1,10 +1,10 @@
 import {
-  describe, beforeAll, test, expect, afterAll,
+  describe, beforeAll, it, expect, afterAll,
 } from '@jest/globals';
 import fastify from 'fastify';
 import build from '../src/server.js';
 
-describe('test main page', () => {
+describe('Main page tests:', () => {
   let app;
 
   beforeAll(async () => {
@@ -15,18 +15,18 @@ describe('test main page', () => {
     await build(app);
   });
 
-  test('GET 200', async () => {
+  it('shows main page', async () => {
     const response = await app.inject({
       method: 'GET',
-      url: '/',
+      url: app.reverse('index'),
     });
     expect(response.statusCode).toBe(200);
   });
 
-  test('GET 404', async () => {
+  it('shows 404 page', async () => {
     const response = await app.inject({
       method: 'GET',
-      url: '/index.html',
+      url: '/page-404',
     });
     expect(response.statusCode).toBe(404);
   });
