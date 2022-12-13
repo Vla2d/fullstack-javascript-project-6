@@ -1,4 +1,3 @@
-
 exports.up = function(knex) {
     return knex.schema.createTable('labels', (table) => {
       table.increments('id').primary();
@@ -7,6 +6,6 @@ exports.up = function(knex) {
     })
   };
   
-  exports.down = function(knex) {
-    return knex.schema.dropTable('labels');
-  };
+exports.down = function(knex) {
+  return knex.schema.dropTable('labels');
+};

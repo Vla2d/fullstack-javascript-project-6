@@ -33,6 +33,10 @@ jobs:
         # Add environment variables
         env:
           CI: true
+      - name: Run linter
+        # Run Linter
+        run: |
+          make lint 
       - name: Publish to code climate
         uses: paambaati/codeclimate-action@v2.7.4
         env:

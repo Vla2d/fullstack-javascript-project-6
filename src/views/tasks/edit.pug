@@ -6,7 +6,7 @@ block header
 block content
   div(class="row")
     div(class="col-4")
-      form(action=reverse('task', { id: task.id }) method="post")
+      form(action=reverse('updateTask', { id: task.id }) method="post")
         +input('text', 'name', t('views.tasks.edit.name'), errors, task)
         +textarea('description', t('views.tasks.edit.description'), errors, task)
         +select('statusId', t('views.tasks.edit.status'), errors, statuses, task)

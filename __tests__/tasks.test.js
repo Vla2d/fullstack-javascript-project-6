@@ -1,199 +1,173 @@
 import {
-  describe, beforeAll, test, expect, afterEach, afterAll,
+  describe, beforeAll, it, expect, afterAll,
 } from '@jest/globals';
 import fastify from 'fastify';
+import _ from 'lodash';
 import build from '../src/server.js';
-import { getSessionCookie } from './helpers/index.js';
+import {
+  getTestData, prepareData, signIn,
+} from './helpers/index.js';
 
-describe('test tasks CRUD', () => {
+describe('statuses CRUD', () => {
   let app;
+  let knex;
+  let models;
   let cookie;
+  const testData = getTestData();
+  const requiredDataToPrepare = ['users', 'tasks', 'task_statuses', 'labels'];
 
   beforeAll(async () => {
-    app = fastify({
+    const appBuild = fastify({
       exposeHeadRoutes: false,
       logger: { target: 'pino-pretty' },
     });
-    await build(app);
-    await app.objection.knex.migrate.latest();
-    cookie = await getSessionCookie(app);
+    app = await build(appBuild);
+    knex = app.objection.knex;
+    models = app.objection.models;
+
+    await knex.migrate.latest();
+    await prepareData(requiredDataToPrepare, app);
+    cookie = await signIn(app, testData.users.existing);
   });
 
-  test('GET /tasks', async () => {
+  it('shows tasks page', async () => {
     const response = await app.inject({
       method: 'GET',
-      url: '/tasks',
+      url: app.reverse('tasks'),
       cookies: cookie,
     });
     expect(response.statusCode).toBe(200);
   });
 
-  test('GET /tasks', async () => {
+  it('shows new task page', async () => {
     const response = await app.inject({
       method: 'GET',
-      url: '/tasks',
+      url: app.reverse('newTask'),
+      cookies: cookie,
     });
-    expect(response.statusCode).toBe(302);
+    expect(response.statusCode).toBe(200);
   });
 
-  test('GET /tasks/new', async () => {
+  it('creates new task', async () => {
+    const {
+      labels: { existing: existingLabel },
+      tasks: { new: updatedTaskData },
+    } = testData;
+
     const response = await app.inject({
-      method: 'GET',
-      url: '/tasks/new',
-    });
-    expect(response.statusCode).toBe(302);
-  });
-
-  test('GET /tasks/1', async () => {
-    const response = await app.inject({
-      method: 'GET',
-      url: '/tasks/1',
-    });
-    expect(response.statusCode).toBe(302);
-  });
-
-  test('GET /tasks/1/edit', async () => {
-    const response = await app.inject({
-      method: 'GET',
-      url: '/tasks/1/edit',
-    });
-    expect(response.statusCode).toBe(302);
-  });
-
-  test('POST /tasks', async () => {
-    await app.inject({
       method: 'POST',
-      url: '/tasks',
+      url: app.reverse('createTask'),
+      cookies: cookie,
       payload: {
         data: {
-          creatorId: '1',
-          name: 'Наименование задачи',
-          statusId: '0',
+          ...updatedTaskData,
+          labels: [existingLabel.id],
         },
       },
-      cookies: cookie,
     });
-    const task = await app.objection.models.task.query().findById(1);
-    const { name } = task;
-    expect(name).toBe('Наименование задачи');
+    expect(response.statusCode).toBe(302);
+
+    const task = await models.task.query().findOne({ name: updatedTaskData.name });
+    expect(task).toMatchObject(updatedTaskData);
+
+    const [relatedLabel] = await task.$relatedQuery('labels');
+    expect(relatedLabel).toMatchObject(existingLabel);
   });
 
-  test('DELETE /tasks', async () => {
-    await app.inject({
-      method: 'POST',
-      url: '/tasks',
-      payload: {
-        data: {
-          creatorId: '1',
-          name: 'Наименование задачи',
-          statusId: '0',
-        },
-      },
-      cookies: cookie,
-    });
+  it('shows existing task edit page', async () => {
+    const { id } = testData.tasks.existing;
 
-    await app.inject({
-      method: 'DELETE',
-      url: '/tasks/1',
+    const response = await app.inject({
+      method: 'GET',
+      url: app.reverse('editTask', { id }),
       cookies: cookie,
     });
-    const users = await app.objection.models.task.query();
-    expect(users)
-      .toEqual([]);
+    expect(response.statusCode).toBe(200);
   });
 
-  test('PATCH /tasks', async () => {
-    await app.inject({
-      method: 'POST',
-      url: '/tasks',
-      payload: {
-        data: {
-          creatorId: '1',
-          name: 'Наименование задачи',
-          statusId: '0',
-        },
-      },
-      cookies: cookie,
-    });
+  it('updates existing task (from its creator)', async () => {
+    const {
+      tasks: { existing: existedTask },
+      statuses: { existing2: anotherStatus },
+    } = testData;
 
-    await app.inject({
+    const updatedTaskData = { name: 'Fix bug', statusId: Number(anotherStatus.id) };
+
+    const response = await app.inject({
       method: 'PATCH',
-      url: '/tasks/1',
-      payload: {
-        data: {
-          creatorId: '1',
-          name: 'Наименование задачи',
-          statusId: '1',
-        },
-      },
+      url: app.reverse('updateTask', { id: existedTask.id }),
       cookies: cookie,
+      payload: {
+        data: updatedTaskData,
+      },
     });
-    const task = await app.objection.models.task.query().findById(1);
-    const { statusId } = task;
-    expect(statusId)
-      .toBe(1);
+    expect(response.statusCode).toBe(302);
+
+    const task = await models.task.query().findById(existedTask.id);
+    expect(task).toMatchObject(updatedTaskData);
+
+    // knex creates a table with 'created_at' property
+    // so here we have to avoid it somehow in order to test with fixtures
+    const relatedStatusWithCreatureDate = await task.$relatedQuery('taskStatus');
+    const relatedStatus = _.omit(relatedStatusWithCreatureDate[0], ['createdAt']);
+    expect(relatedStatus).toMatchObject(anotherStatus);
   });
 
-  test('GET /tasks/1', async () => {
-    await app.inject({
-      method: 'POST',
-      url: '/statuses',
-      payload: {
-        data: {
-          name: 'Новый',
-        },
-      },
-      cookies: cookie,
-    });
+  it('updates existing task (from another creator)', async () => {
+    const {
+      tasks: { existing2: existedTask2 },
+      users: { existing: user1 },
+      statuses: { existing: status },
+    } = testData;
 
-    await app.inject({
-      method: 'POST',
-      url: '/tasks',
-      payload: {
-        data: {
-          creatorId: '1',
-          name: 'Наименование задачи',
-          statusId: '1',
-        },
-      },
+    const updatedTaskData = { name: 'Write tests', executorId: user1.id, statusId: status.id };
+
+    const response3 = await app.inject({
+      method: 'PATCH',
+      url: app.reverse('updateTask', { id: existedTask2.id }),
       cookies: cookie,
+      payload: {
+        data: updatedTaskData,
+      },
     });
+    expect(response3.statusCode).toBe(302);
+
+    const task = await models.task.query().findById(existedTask2.id);
+    expect(task).toMatchObject(updatedTaskData);
+  });
+
+  it('deletes task (from its creator)', async () => {
+    const {
+      tasks: { existing: ownTask },
+    } = testData;
+    const response = await app.inject({
+      method: 'DELETE',
+      cookies: cookie,
+      url: app.reverse('deleteTask', { id: ownTask.id }),
+    });
+    expect(response.statusCode).toBe(302);
+
+    const task = await models.task.query().findById(ownTask.id);
+    expect(task).toBeUndefined();
+  });
+
+  it('does not delete task (from another creator)', async () => {
+    const {
+      existing2: foreignTask,
+    } = testData.tasks;
 
     const response = await app.inject({
-      method: 'GET',
-      url: '/tasks/1',
+      method: 'DELETE',
       cookies: cookie,
+      url: app.reverse('deleteTask', { id: foreignTask.id }),
     });
-    expect(response.statusCode).toBe(200);
+    expect(response.statusCode).toBe(403);
+
+    const task = await models.task.query().findById(foreignTask.id);
+    expect(task).toMatchObject(task);
   });
 
-  test('GET /tasks/1', async () => {
-    await app.inject({
-      method: 'POST',
-      url: '/tasks',
-      payload: {
-        data: {
-          creatorId: '1',
-          name: 'Наименование задачи',
-          statusId: '0',
-        },
-      },
-      cookies: cookie,
-    });
-
-    const response = await app.inject({
-      method: 'GET',
-      url: '/tasks/1/edit',
-      cookies: cookie,
-    });
-    expect(response.statusCode).toBe(200);
-  });
-
-  afterEach(async () => {
-    await app.objection.knex('tasks').truncate();
-  });
-
-  afterAll(async () => {
-    await app.close();
+  afterAll(() => {
+    app.close();
   });
 });

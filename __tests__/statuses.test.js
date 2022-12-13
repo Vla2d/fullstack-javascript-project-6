@@ -1,124 +1,113 @@
 import {
-  describe, beforeAll, beforeEach, test, expect, afterEach, afterAll,
+  describe, beforeAll, it, expect, afterAll,
 } from '@jest/globals';
 import fastify from 'fastify';
 import build from '../src/server.js';
-import { getSessionCookie } from './helpers/index.js';
+import {
+  getTestData, prepareData, signIn,
+} from './helpers/index.js';
 
-describe('test statuses CRUD with login', () => {
+describe('statuses CRUD', () => {
   let app;
+  let knex;
+  let models;
   let cookie;
+  const testData = getTestData();
+  const requiredDataToPrepare = ['users', 'task_statuses'];
 
   beforeAll(async () => {
-    app = fastify({
+    const appBuild = fastify({
       exposeHeadRoutes: false,
       logger: { target: 'pino-pretty' },
     });
-    await build(app);
-    await app.objection.knex.migrate.latest();
-    cookie = await getSessionCookie(app);
+    app = await build(appBuild);
+    knex = app.objection.knex;
+    models = app.objection.models;
+
+    await knex.migrate.latest();
+    await prepareData(requiredDataToPrepare, app);
+    cookie = await signIn(app, testData.users.existing);
   });
 
-  beforeEach(async () => {
-    await app.objection.knex('task_statuses').insert({ name: 'новый' });
-  });
-
-  test('GET /statuses', async () => {
+  it('shows statuses page', async () => {
     const response = await app.inject({
       method: 'GET',
-      url: '/statuses',
-    });
-    expect(response.statusCode).toBe(302);
-  });
-
-  test('GET /statuses/new', async () => {
-    const response = await app.inject({
-      method: 'GET',
-      url: '/statuses/new',
-    });
-    expect(response.statusCode).toBe(302);
-  });
-
-  test('GET /statuses/1/edit', async () => {
-    const response = await app.inject({
-      method: 'GET',
-      url: '/statuses/1/edit',
-    });
-    expect(response.statusCode).toBe(302);
-  });
-
-  test('PATCH /statuses/1', async () => {
-    const response = await app.inject({
-      method: 'PATCH',
-      url: '/statuses/1',
-    });
-    expect(response.statusCode).toBe(302);
-  });
-
-  test('DELETE /users/1', async () => {
-    const response = await app.inject({
-      method: 'DELETE',
-      url: '/statuses/1',
-    });
-    expect(response.statusCode).toBe(302);
-  });
-
-  test('DELETE /statuses', async () => {
-    await app.inject({
-      method: 'DELETE',
-      url: '/statuses/1',
-      cookies: cookie,
-    });
-    const users = await app.objection.models.taskStatus.query();
-    expect(users).toEqual([]);
-  });
-
-  test('GET /statuses', async () => {
-    const response = await app.inject({
-      method: 'GET',
-      url: '/statuses',
+      url: app.reverse('statuses'),
       cookies: cookie,
     });
     expect(response.statusCode).toBe(200);
   });
 
-  test('POST /statuses', async () => {
-    await app.inject({
+  it('shows new status page', async () => {
+    const response = await app.inject({
+      method: 'GET',
+      url: app.reverse('newStatus'),
+      cookies: cookie,
+    });
+    expect(response.statusCode).toBe(200);
+  });
+
+  it('creates new status', async () => {
+    const updatedData = testData.statuses.new;
+
+    const response = await app.inject({
       method: 'POST',
-      url: '/statuses',
-      payload: {
-        data: {
-          name: 'На тестировании',
-        },
-      },
+      url: app.reverse('statusCreate'),
       cookies: cookie,
+      payload: {
+        data: updatedData,
+      },
     });
-    const taskStatus = await app.objection.models.taskStatus.query().findById(2);
-    const { name } = taskStatus;
-    expect(name).toBe('На тестировании');
+    expect(response.statusCode).toBe(302);
+
+    const status = await models.taskStatus.query().findOne({ name: updatedData.name });
+    expect(status).toMatchObject(updatedData);
   });
 
-  test('PATCH /statuses', async () => {
-    await app.inject({
+  it('shows existing status edit page', async () => {
+    const { id } = testData.statuses.existing;
+
+    const response = await app.inject({
+      method: 'GET',
+      url: app.reverse('editStatus', { id }),
+      cookies: cookie,
+    });
+    expect(response.statusCode).toBe(200);
+  });
+
+  it('updates existing status', async () => {
+    const { id } = testData.statuses.existing;
+    const updatedData = { name: 'new status' };
+
+    const response = await app.inject({
       method: 'PATCH',
-      url: '/statuses/1',
+      url: app.reverse('updateStatus', { id }),
       cookies: cookie,
       payload: {
-        data: {
-          name: 'В работе',
-        },
+        data: updatedData,
       },
     });
-    const taskStatus = await app.objection.models.taskStatus.query().findById(1);
-    const { name } = taskStatus;
-    expect(name).toBe('В работе');
+    expect(response.statusCode).toBe(302);
+
+    const status = await models.taskStatus.query().findById(id);
+    expect(status).toMatchObject({ ...testData.statuses.existing, ...updatedData });
   });
 
-  afterEach(async () => {
-    await app.objection.knex('task_statuses').truncate();
+  it('delete status', async () => {
+    const { existing } = testData.statuses;
+
+    const response = await app.inject({
+      method: 'DELETE',
+      url: app.reverse('deleteStatus', { id: existing.id }),
+      cookies: cookie,
+    });
+    expect(response.statusCode).toBe(302);
+
+    const status2 = await models.taskStatus.query().findById(existing.id);
+    expect(status2).toBeUndefined();
   });
 
-  afterAll(async () => {
-    await app.close();
+  afterAll(() => {
+    app.close();
   });
 });
