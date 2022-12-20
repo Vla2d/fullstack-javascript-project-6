@@ -7,7 +7,7 @@ import {
   getTestData, prepareData, signIn,
 } from './helpers/index.js';
 
-describe('Labels CRUD tests:', () => {
+describe('Labels CRUD', () => {
   let app;
   let knex;
   let models;
@@ -25,7 +25,7 @@ describe('Labels CRUD tests:', () => {
     models = app.objection.models;
 
     await knex.migrate.latest();
-    await prepareData(requiredDataToPrepare, app);
+    await prepareData(app, requiredDataToPrepare);
     cookie = await signIn(app, testData.users.existing);
   });
 

@@ -6,6 +6,9 @@ exports.up = function(knex) {
       table.string('email');
       table.string('password_digest');
       table.timestamp('created_at').defaultTo(knex.fn.now());
+      // TODO 
+      // index
+      // table.timestamps(true, true);
     })
 };
   

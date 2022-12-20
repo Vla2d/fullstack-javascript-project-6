@@ -7,7 +7,7 @@ import {
   getTestData, prepareData, signIn,
 } from './helpers/index.js';
 
-describe('statuses CRUD', () => {
+describe('Session controller', () => {
   let app;
   let knex;
   const testData = getTestData();
@@ -22,7 +22,7 @@ describe('statuses CRUD', () => {
     knex = app.objection.knex;
 
     await knex.migrate.latest();
-    await prepareData(requiredDataToPrepare, app);
+    await prepareData(app, requiredDataToPrepare);
   });
 
   it('shows login page', async () => {

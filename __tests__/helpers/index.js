@@ -11,11 +11,11 @@ const getFixtureData = (filename) => JSON.parse(readFixture(filename));
 
 export const getTestData = () => getFixtureData('testData.json');
 
-export const prepareData = async (dataTypes, app) => {
+export const prepareData = async (app, tableNames) => {
   const { knex } = app.objection;
 
-  dataTypes.map(async (dataType) => {
-    await knex(dataType).insert(getFixtureData(`${dataType}.json`));
+  tableNames.map(async (tableName) => {
+    await knex(tableName).insert(getFixtureData(`${tableName}.json`));
   });
 };
 

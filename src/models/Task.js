@@ -7,7 +7,7 @@ export default class Task extends Model {
   $parseJson(json, options) {
     const data = super.$parseJson(json, options);
 
-    const resultData = {
+    return {
       ...(data.id && { id: Number(data.id) }),
       ...(data.name && { name: data.name.trim() }),
       ...(data.description && { description: data.description.trim() }),
@@ -16,8 +16,6 @@ export default class Task extends Model {
       ...(data.creatorId && { creatorId: Number(data.creatorId) }),
       ...(data.labels && { labels: data.labels }),
     };
-
-    return resultData;
   }
 
   static get tableName() {

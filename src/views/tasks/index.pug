@@ -13,7 +13,7 @@ block content
             +formSelect('executor', t('views.tasks.index.executor'), users, values)
             +formSelect('label', t('views.tasks.index.label'), labels, values)
           div(class="mb-3 form-check")
-            - isChecked = values.isCreatorUser === 'on'
+            - isChecked = !!values.isCreatorUser
             input(class="form-check-input" id="data_isCreatorUser" type="checkbox" name="isCreatorUser" checked=isChecked)
             label(class="form-check-label" for="data_isCreatorUser")=t('views.tasks.index.myTasks')
           input(class="btn btn-primary" type="submit" value=t('views.tasks.index.filterSubmit'))

@@ -4,7 +4,7 @@ import {
 import fastify from 'fastify';
 import build from '../src/server.js';
 
-describe('Main page tests:', () => {
+describe('Main page', () => {
   let app;
 
   beforeAll(async () => {

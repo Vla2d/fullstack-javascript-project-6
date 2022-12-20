@@ -2,7 +2,9 @@ import i18next from 'i18next';
 
 export default (app) => {
   app.get('/statuses', { name: 'statuses', preValidation: app.fp.isAuth }, async (request, reply) => {
-    const statuses = await app.objection.models.taskStatus.query();
+    const { models } = app.objection;
+
+    const statuses = await models.taskStatus.query();
     reply.render('statuses/index', { statuses });
     return reply;
   });
@@ -11,15 +13,20 @@ export default (app) => {
     return reply;
   });
   app.get('/statuses/:id/edit', { name: 'editStatus', preValidation: app.fp.isAuth }, async (request, reply) => {
+    const { models } = app.objection;
     const { id } = request.params;
-    const status = await app.objection.models.taskStatus.query().findById(id);
+
+    const status = await models.taskStatus.query().findById(id);
     reply.render('statuses/edit', { status });
     return reply;
   });
   app.post('/statuses', { name: 'statusCreate', preValidation: app.fp.isAuth }, async (request, reply) => {
+    const { models } = app.objection;
+    const { data } = request.body;
+
     try {
-      const validStatus = await app.objection.models.taskStatus.fromJson(request.body.data);
-      await app.objection.models.taskStatus.query().insert(validStatus);
+      const validStatus = await models.taskStatus.fromJson(data);
+      await models.taskStatus.query().insert(validStatus);
       request.flash('success', i18next.t('flash.statuses.success'));
       reply.redirect(app.reverse('statuses'));
     } catch (errors) {
@@ -30,24 +37,30 @@ export default (app) => {
     return reply;
   });
   app.patch('/statuses/:id', { name: 'updateStatus', preValidation: app.fp.isAuth }, async (request, reply) => {
+    const { models } = app.objection;
+    const { data } = request.body;
     const { id } = request.params;
-    const status = new app.objection.models.taskStatus();
-    status.$set({ id, ...request.body.data });
+
+    const status = new models.taskStatus();
+    status.$set({ id, ...data });
+
     try {
-      await status.$query().findById(id).patch(request.body.data);
+      await status.$query().findById(id).patch(data);
       request.flash('success', i18next.t('flash.statuses.edit'));
       reply.redirect('/statuses');
     } catch (errors) {
       request.flash('error', i18next.t('flash.statuses.editError'));
-      reply.render('statuses/edit', { status: request.body.data, errors: errors.data });
+      reply.render('statuses/edit', { status: data, errors: errors.data });
       reply.code(422);
     }
     return reply;
   });
   app.delete('/statuses/:id', { name: 'deleteStatus', preValidation: app.fp.isAuth }, async (request, reply) => {
+    const { models } = app.objection;
+
     try {
       const { id } = request.params;
-      await app.objection.models.taskStatus.query().deleteById(id);
+      await models.taskStatus.query().deleteById(id);
       request.flash('success', i18next.t('flash.statuses.delete'));
     } catch (error) {
       request.flash('error', i18next.t('flash.statuses.deleteError'));
