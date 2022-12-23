@@ -5,10 +5,7 @@ exports.up = function(knex) {
       table.string('last_name');
       table.string('email');
       table.string('password_digest');
-      table.timestamp('created_at').defaultTo(knex.fn.now());
-      // TODO 
-      // index
-      // table.timestamps(true, true);
+      table.timestamps(true, true);
     })
 };
   

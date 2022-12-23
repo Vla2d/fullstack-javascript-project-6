@@ -4,20 +4,6 @@ import User from './User.js';
 import Label from './Label.js';
 
 export default class Task extends Model {
-  $parseJson(json, options) {
-    const data = super.$parseJson(json, options);
-
-    return {
-      ...(data.id && { id: Number(data.id) }),
-      ...(data.name && { name: data.name.trim() }),
-      ...(data.description && { description: data.description.trim() }),
-      ...(data.statusId && { statusId: Number(data.statusId) }),
-      ...(data.executorId && { executorId: Number(data.executorId) }),
-      ...(data.creatorId && { creatorId: Number(data.creatorId) }),
-      ...(data.labels && { labels: data.labels }),
-    };
-  }
-
   static get tableName() {
     return 'tasks';
   }

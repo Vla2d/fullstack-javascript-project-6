@@ -67,15 +67,24 @@ export default (app) => {
     const { models } = app.objection;
     const { data } = request.body;
 
+    const parsedData = {
+      ...(data.id && { id: Number(data.id) }),
+      ...(data.name && { name: data.name.trim() }),
+      ...(data.description ? { description: data.description.trim() } : { description: null }),
+      ...(data.statusId && { statusId: Number(data.statusId) }),
+      ...(data.executorId ? { executorId: Number(data.executorId) } : { executorId: null }),
+      ...(data.creatorId && { creatorId: Number(data.creatorId) }),
+      ...(data.labels ? { labels: data.labels } : { labels: null }),
+    };
+
     try {
       await models.task.transaction(async (trx) => {
-        const creatorId = String(request.user.id);
-        const { executorId } = data;
-        const validTask = await models.task.fromJson({ ...data, creatorId, executorId });
+        const validTask = await models.task.fromJson({ ...parsedData });
         await models.task.query(trx).insert(validTask);
+        console.log(await models.task.query(trx));
 
-        if (data.labels) {
-          const labels = [...data.labels];
+        if (parsedData.labels) {
+          const labels = [...parsedData.labels];
           const results = labels.map((label) => validTask.$relatedQuery('labels', trx).relate(label));
           await Promise.all(results);
         }
@@ -89,7 +98,7 @@ export default (app) => {
       const statuses = await models.taskStatus.query();
       const labels = await models.label.query();
       reply.render('/tasks/new', {
-        task: data,
+        task: parsedData,
         errors: errors.data,
         users,
         statuses,
@@ -104,15 +113,24 @@ export default (app) => {
     const { data } = request.body;
     const { id } = request.params;
 
+    const parsedData = {
+      ...(data.id && { id: Number(data.id) }),
+      ...(data.name && { name: data.name.trim() }),
+      ...(data.description ? { description: data.description.trim() } : { description: null }),
+      ...(data.statusId && { statusId: Number(data.statusId) }),
+      ...(data.executorId ? { executorId: Number(data.executorId) } : { executorId: null }),
+      ...(data.creatorId && { creatorId: Number(data.creatorId) }),
+      ...(data.labels ? { labels: data.labels } : { labels: null }),
+    };
+
     try {
       await models.task.transaction(async (trx) => {
         const task = new models.task();
-        task.$set({ id, ...data });
-        const { executorId } = data;
-        await task.$query(trx).findById(id).patch({ ...data, executorId });
-        if (data.labels) {
+        task.$set({ id, ...parsedData });
+        await task.$query(trx).findById(id).patch({ ...parsedData });
+        if (parsedData.labels) {
           await task.$relatedQuery('labels', trx).unrelate();
-          const labels = [...data.labels];
+          const labels = [...parsedData.labels];
           const results = labels.map((label) => task.$relatedQuery('labels', trx).relate(label));
           await Promise.all(results);
         }
@@ -125,7 +143,7 @@ export default (app) => {
       const users = await models.user.query();
       const labels = await models.label.query();
       reply.render('tasks/edit', {
-        task: { id, ...data },
+        task: { id, ...parsedData },
         statuses,
         users,
         labels,
