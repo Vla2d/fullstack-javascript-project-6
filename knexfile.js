@@ -14,6 +14,7 @@ export default {
     connection: {
       filename: join(__dirname, 'db', 'database.sqlite'),
     },
+    useNullAsDefault: true,
     migrations,
     pool: {
       afterCreate: (conn, done) => {

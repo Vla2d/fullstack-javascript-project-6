@@ -3,9 +3,13 @@ exports.up = function(knex) {
       table.increments('id').primary();
       table.string('name');
       table.string('description');
-      table.integer('status_id').references('id').inTable('task_statuses');
-      table.integer('creator_id').references('id').inTable('users');
-      table.integer('executor_id').references('id').inTable('users');
+      table.integer('status_id');
+      table.integer('creator_id');
+      table.integer('executor_id');
+
+      table.foreign('status_id').references('id').inTable('task_statuses');
+      table.foreign('creator_id').references('id').inTable('users');
+      table.foreign('executor_id').references('id').inTable('users');
       table.timestamps(true, true);
     })
   };

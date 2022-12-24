@@ -68,20 +68,19 @@ export default (app) => {
     const { data } = request.body;
 
     const parsedData = {
-      ...(data.id && { id: Number(data.id) }),
-      ...(data.name && { name: data.name.trim() }),
+      id: Number(data.id),
+      name: data.name.trim(),
       ...(data.description ? { description: data.description.trim() } : { description: null }),
       ...(data.statusId && { statusId: Number(data.statusId) }),
       ...(data.executorId ? { executorId: Number(data.executorId) } : { executorId: null }),
-      ...(data.creatorId && { creatorId: Number(data.creatorId) }),
       ...(data.labels ? { labels: data.labels } : { labels: null }),
+      creatorId: request.user.id,
     };
 
     try {
       await models.task.transaction(async (trx) => {
         const validTask = await models.task.fromJson({ ...parsedData });
         await models.task.query(trx).insert(validTask);
-        console.log(await models.task.query(trx));
 
         if (parsedData.labels) {
           const labels = [...parsedData.labels];
@@ -115,12 +114,12 @@ export default (app) => {
 
     const parsedData = {
       ...(data.id && { id: Number(data.id) }),
-      ...(data.name && { name: data.name.trim() }),
+      name: data.name.trim(),
       ...(data.description ? { description: data.description.trim() } : { description: null }),
-      ...(data.statusId && { statusId: Number(data.statusId) }),
+      statusId: Number(data.statusId),
       ...(data.executorId ? { executorId: Number(data.executorId) } : { executorId: null }),
-      ...(data.creatorId && { creatorId: Number(data.creatorId) }),
       ...(data.labels ? { labels: data.labels } : { labels: null }),
+      ...(data.creatorId && { creatorId: Number(data.creatorId) }),
     };
 
     try {

@@ -4,7 +4,7 @@ setup:
 start:
 	heroku local -f Procfile.dev
 start-backend:
-	npm start -- --watch --verbose-watch --ignore-watch='node_modules .git'
+	npm start -- --watch --debug --verbose-watch --ignore-watch='db node_modules .git'
 start-frontend:
 	npx webpack --watch --progress
 lint:
