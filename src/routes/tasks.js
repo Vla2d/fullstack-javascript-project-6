@@ -68,12 +68,12 @@ export default (app) => {
     const { data } = request.body;
 
     const parsedData = {
-      id: Number(data.id),
+      id: data.id,
       name: data.name.trim(),
-      ...(data.description ? { description: data.description.trim() } : { description: null }),
-      ...(data.statusId && { statusId: Number(data.statusId) }),
-      ...(data.executorId ? { executorId: Number(data.executorId) } : { executorId: null }),
-      ...(data.labels ? { labels: data.labels } : { labels: null }),
+      description: data.description?.trim() || null,
+      statusId: Number(data.statusId),
+      executorId: data.executorId ? Number(data.executorId) : null,
+      labels: data.labels ? data.labels : null,
       creatorId: request.user.id,
     };
 
@@ -113,13 +113,11 @@ export default (app) => {
     const { id } = request.params;
 
     const parsedData = {
-      ...(data.id && { id: Number(data.id) }),
       name: data.name.trim(),
-      ...(data.description ? { description: data.description.trim() } : { description: null }),
+      description: data.description?.trim() || null,
       statusId: Number(data.statusId),
-      ...(data.executorId ? { executorId: Number(data.executorId) } : { executorId: null }),
-      ...(data.labels ? { labels: data.labels } : { labels: null }),
-      ...(data.creatorId && { creatorId: Number(data.creatorId) }),
+      executorId: data.executorId ? Number(data.executorId) : null,
+      labels: data.labels ? data.labels : null,
     };
 
     try {

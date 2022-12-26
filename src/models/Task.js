@@ -14,8 +14,8 @@ export default class Task extends Model {
       required: ['name', 'statusId', 'creatorId'],
       properties: {
         name: { type: 'string', minLength: 1 },
-        statusId: { type: 'integer' },
-        creatorId: { type: 'integer' },
+        statusId: { type: 'integer', minimum: 1 },
+        creatorId: { type: 'integer', minimum: 1 },
       },
     };
   }
