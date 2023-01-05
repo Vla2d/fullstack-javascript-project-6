@@ -20,6 +20,24 @@ export default class Task extends Model {
     };
   }
 
+  static modifiers = {
+    filterByStatus(queryBuilder, status) {
+      queryBuilder.where('statusId', '=', status);
+    },
+
+    filterByExecutor(queryBuilder, executor) {
+      queryBuilder.where('executorId', '=', executor);
+    },
+
+    filterByLabel(queryBuilder, label) {
+      queryBuilder.where('labels.id', '=', label);
+    },
+
+    filterByCreator(queryBuilder, creatorId) {
+      queryBuilder.where('creatorId', '=', creatorId);
+    },
+  };
+
   static get relationMappings() {
     return {
       taskStatus: {

@@ -7,14 +7,23 @@ export default (app) => {
       status, executor, label, isCreatorUser,
     } = request.query;
 
-    const tasks = await models.task.query()
-      .withGraphJoined('[taskStatus, creator, executor, labels]')
-      .modify((queryBuilder) => {
-        if (status) queryBuilder.where('statusId', '=', status);
-        if (executor) queryBuilder.where('executor.id', '=', executor);
-        if (label) queryBuilder.where('labels.id', '=', label);
-        if (isCreatorUser) queryBuilder.where('creator.id', '=', request.user.id);
-      });
+    const query = models.task.query()
+      .withGraphJoined('[taskStatus, creator, executor, labels]');
+
+    if (status) {
+      query.modify('filterByStatus', status);
+    }
+    if (executor) {
+      query.modify('filterByExecutor', executor);
+    }
+    if (label) {
+      query.modify('filterByLabel', label);
+    }
+    if (isCreatorUser) {
+      query.modify('filterByCreator', request.user.id);
+    }
+
+    const tasks = await query;
 
     const statuses = await models.taskStatus.query();
     const labels = await models.label.query();
